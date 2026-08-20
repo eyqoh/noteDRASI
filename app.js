@@ -3,32 +3,50 @@
 // Sistema de marcas
 // ============================================
 
+
 const STORAGE_KEY = "notedrasi_brands";
 
 
+let brands = loadBrands();
+
+
 // --------------------------------------------
-// Cargar marcas
+// CARGAR MARCAS
 // --------------------------------------------
 
 function loadBrands() {
 
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const saved =
+        localStorage.getItem(STORAGE_KEY);
+
 
     if (!saved) {
+
         return [];
+
     }
 
+
     try {
+
         return JSON.parse(saved);
+
     } catch (error) {
-        console.error("Error al cargar las marcas:", error);
+
+        console.error(
+            "Error al cargar marcas:",
+            error
+        );
+
         return [];
+
     }
+
 }
 
 
 // --------------------------------------------
-// Guardar marcas
+// GUARDAR MARCAS
 // --------------------------------------------
 
 function saveBrands() {
@@ -42,14 +60,7 @@ function saveBrands() {
 
 
 // --------------------------------------------
-// Datos actuales
-// --------------------------------------------
-
-let brands = loadBrands();
-
-
-// --------------------------------------------
-// Crear marca
+// CREAR MARCA
 // --------------------------------------------
 
 function createBrand(name, color) {
@@ -66,6 +77,7 @@ function createBrand(name, color) {
 
     };
 
+
     brands.push(brand);
 
     saveBrands();
@@ -76,55 +88,70 @@ function createBrand(name, color) {
 
 
 // --------------------------------------------
-// Abrir marca
+// ABRIR MARCA
 // --------------------------------------------
 
 function openBrand(id) {
 
-    const brand = brands.find(
-        brand => brand.id === id
-    );
+    const brand =
+        brands.find(
+            brand => brand.id === id
+        );
+
 
     if (!brand) {
+
         return;
+
     }
 
-    const brandGrid =
-        document.querySelector(".brand-grid");
+
+    const homeView =
+        document.querySelector(
+            "#home-view"
+        );
+
 
     const brandView =
-        document.querySelector("#brand-view");
+        document.querySelector(
+            "#brand-view"
+        );
 
-    const sectionTitle =
-        document.querySelector(".section-title");
-
-    const search =
-        document.querySelector(".search");
 
     const brandTitle =
-        document.querySelector("#brand-title");
+        document.querySelector(
+            "#brand-title"
+        );
+
 
     const brandCount =
-        document.querySelector("#brand-perfume-count");
+        document.querySelector(
+            "#brand-perfume-count"
+        );
+
 
     const brandIcon =
-        document.querySelector("#brand-icon");
+        document.querySelector(
+            "#brand-icon"
+        );
 
 
-    brandGrid.classList.add("hidden");
+    homeView.style.display =
+        "none";
 
-    sectionTitle.classList.add("hidden");
 
-    search.classList.add("hidden");
-
-    brandView.classList.remove("hidden");
+    brandView.style.display =
+        "block";
 
 
     brandTitle.textContent =
         brand.name;
 
+
     brandCount.textContent =
-        brand.perfumes.length + " perfumes";
+        brand.perfumes.length +
+        " perfumes";
+
 
     brandIcon.style.color =
         brand.color;
@@ -133,48 +160,51 @@ function openBrand(id) {
 
 
 // --------------------------------------------
-// Volver a marcas
+// VOLVER A MARCAS
 // --------------------------------------------
 
 function closeBrand() {
 
-    const brandGrid =
-        document.querySelector(".brand-grid");
+    const homeView =
+        document.querySelector(
+            "#home-view"
+        );
+
 
     const brandView =
-        document.querySelector("#brand-view");
-
-    const sectionTitle =
-        document.querySelector(".section-title");
-
-    const search =
-        document.querySelector(".search");
+        document.querySelector(
+            "#brand-view"
+        );
 
 
-    brandView.classList.add("hidden");
+    brandView.style.display =
+        "none";
 
-    brandGrid.classList.remove("hidden");
 
-    sectionTitle.classList.remove("hidden");
-
-    search.classList.remove("hidden");
+    homeView.style.display =
+        "block";
 
 }
 
 
 // --------------------------------------------
-// Eliminar marca
+// ELIMINAR MARCA
 // --------------------------------------------
 
 function deleteBrand(id) {
 
-    const brand = brands.find(
-        brand => brand.id === id
-    );
+    const brand =
+        brands.find(
+            brand => brand.id === id
+        );
+
 
     if (!brand) {
+
         return;
+
     }
+
 
     const confirmed =
         confirm(
@@ -183,13 +213,19 @@ function deleteBrand(id) {
             "?"
         );
 
+
     if (!confirmed) {
+
         return;
+
     }
 
-    brands = brands.filter(
-        brand => brand.id !== id
-    );
+
+    brands =
+        brands.filter(
+            brand => brand.id !== id
+        );
+
 
     saveBrands();
 
@@ -199,18 +235,23 @@ function deleteBrand(id) {
 
 
 // --------------------------------------------
-// Editar marca
+// EDITAR MARCA
 // --------------------------------------------
 
 function editBrand(id) {
 
-    const brand = brands.find(
-        brand => brand.id === id
-    );
+    const brand =
+        brands.find(
+            brand => brand.id === id
+        );
+
 
     if (!brand) {
+
         return;
+
     }
+
 
     const newName =
         prompt(
@@ -218,9 +259,14 @@ function editBrand(id) {
             brand.name
         );
 
+
     if (newName) {
-        brand.name = newName;
+
+        brand.name =
+            newName;
+
     }
+
 
     const newColor =
         prompt(
@@ -228,9 +274,14 @@ function editBrand(id) {
             brand.color
         );
 
+
     if (newColor) {
-        brand.color = newColor;
+
+        brand.color =
+            newColor;
+
     }
+
 
     saveBrands();
 
@@ -240,170 +291,174 @@ function editBrand(id) {
 
 
 // --------------------------------------------
-// Mostrar marcas
+// MOSTRAR MARCAS
 // --------------------------------------------
 
 function renderBrands() {
 
     const container =
-        document.querySelector(".brand-grid");
+        document.querySelector(
+            ".brand-grid"
+        );
+
 
     if (!container) {
+
         return;
+
     }
+
 
     container.innerHTML = "";
 
 
-    if (brands.length === 0) {
+    brands.forEach(
+        function(brand) {
 
-        container.innerHTML = `
 
-            <div class="empty-state">
+            const card =
+                document.createElement(
+                    "article"
+                );
 
-                <div class="empty-icon">
+
+            card.className =
+                "brand-card";
+
+
+            card.style.borderColor =
+                brand.color;
+
+
+            card.innerHTML = `
+
+                <div class="brand-icon">
                     📁
                 </div>
 
-                <div class="empty-title">
-                    No hay marcas todavía
+
+                <div>
+
+                    <div class="brand-name">
+                        ${brand.name}
+                    </div>
+
+
+                    <div class="brand-count">
+                        ${brand.perfumes.length}
+                        perfumes
+                    </div>
+
                 </div>
 
-                <div class="empty-text">
-                    Creá tu primera carpeta para empezar.
+
+                <div class="brand-actions">
+
+                    <button
+                        class="edit-brand"
+                        type="button"
+                    >
+                        ✏️
+                    </button>
+
+
+                    <button
+                        class="delete-brand"
+                        type="button"
+                    >
+                        🗑️
+                    </button>
+
                 </div>
 
-            </div>
-
-        `;
-
-        return;
-
-    }
+            `;
 
 
-    brands.forEach(function(brand) {
+            // Abrir carpeta
 
-        const card =
-            document.createElement("article");
+            card.addEventListener(
+                "click",
+                function() {
 
+                    openBrand(
+                        brand.id
+                    );
 
-        card.className =
-            "brand-card";
-
-
-        card.style.borderColor =
-            brand.color;
-
-
-        card.innerHTML = `
-
-            <div class="brand-icon">
-                📁
-            </div>
-
-            <div>
-
-                <div class="brand-name">
-                    ${brand.name}
-                </div>
-
-                <div class="brand-count">
-                    ${brand.perfumes.length}
-                    perfumes
-                </div>
-
-            </div>
-
-            <div class="brand-actions">
-
-                <button
-                    class="edit-brand"
-                    type="button"
-                >
-                    ✏️
-                </button>
-
-                <button
-                    class="delete-brand"
-                    type="button"
-                >
-                    🗑️
-                </button>
-
-            </div>
-
-        `;
-
-
-        // Abrir carpeta
-
-        card.addEventListener(
-            "click",
-            function() {
-
-                openBrand(brand.id);
-
-            }
-        );
-
-
-        // Editar
-
-        const editButton =
-            card.querySelector(
-                ".edit-brand"
+                }
             );
 
-        editButton.addEventListener(
-            "click",
-            function(event) {
 
-                event.stopPropagation();
+            // Editar
 
-                editBrand(brand.id);
-
-            }
-        );
+            const editButton =
+                card.querySelector(
+                    ".edit-brand"
+                );
 
 
-        // Eliminar
+            editButton.addEventListener(
+                "click",
+                function(event) {
 
-        const deleteButton =
-            card.querySelector(
-                ".delete-brand"
+                    event.stopPropagation();
+
+                    editBrand(
+                        brand.id
+                    );
+
+                }
             );
 
-        deleteButton.addEventListener(
-            "click",
-            function(event) {
 
-                event.stopPropagation();
+            // Eliminar
 
-                deleteBrand(brand.id);
-
-            }
-        );
+            const deleteButton =
+                card.querySelector(
+                    ".delete-brand"
+                );
 
 
-        container.appendChild(card);
+            deleteButton.addEventListener(
+                "click",
+                function(event) {
 
-    });
+                    event.stopPropagation();
+
+                    deleteBrand(
+                        brand.id
+                    );
+
+                }
+            );
+
+
+            container.appendChild(
+                card
+            );
+
+
+        }
+    );
 
 }
 
 
 // --------------------------------------------
-// Botón agregar marca
+// BOTÓN AGREGAR MARCA
 // --------------------------------------------
 
 function setupAddButton() {
 
     const button =
-        document.querySelector(".add-button");
+        document.querySelector(
+            ".add-button"
+        );
+
 
     if (!button) {
+
         return;
+
     }
 
 
@@ -411,13 +466,17 @@ function setupAddButton() {
         "click",
         function() {
 
+
             const name =
                 prompt(
                     "Nombre de la marca:"
                 );
 
+
             if (!name) {
+
                 return;
+
             }
 
 
@@ -430,8 +489,10 @@ function setupAddButton() {
 
             createBrand(
                 name,
-                color || "#b8ff3d"
+                color ||
+                "#b8ff3d"
             );
+
 
         }
     );
@@ -440,16 +501,21 @@ function setupAddButton() {
 
 
 // --------------------------------------------
-// Botón volver
+// BOTÓN VOLVER
 // --------------------------------------------
 
 function setupBackButton() {
 
     const button =
-        document.querySelector("#back-button");
+        document.querySelector(
+            "#back-button"
+        );
+
 
     if (!button) {
+
         return;
+
     }
 
 
@@ -466,7 +532,7 @@ function setupBackButton() {
 
 
 // --------------------------------------------
-// Iniciar noteDRASI
+// INICIAR APP
 // --------------------------------------------
 
 document.addEventListener(
