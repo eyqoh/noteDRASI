@@ -1,6 +1,6 @@
 // ============================================
 // noteDRASI
-// Carpetas + notas
+// Carpetas + notas + editor
 // ============================================
 
 
@@ -12,6 +12,8 @@ let brands = loadBrands();
 let currentBrandId = null;
 
 let currentNoteId = null;
+
+let editingNoteId = null;
 
 
 // ============================================
@@ -37,22 +39,18 @@ function loadBrands() {
             JSON.parse(saved);
 
 
-        // Compatibilidad con carpetas
-        // creadas anteriormente
-
         data.forEach(
             brand => {
-
-                if (!Array.isArray(brand.perfumes)) {
-
-                    brand.perfumes = [];
-
-                }
-
 
                 if (!Array.isArray(brand.notes)) {
 
                     brand.notes = [];
+
+                }
+
+                if (!Array.isArray(brand.perfumes)) {
+
+                    brand.perfumes = [];
 
                 }
 
@@ -65,7 +63,7 @@ function loadBrands() {
     } catch (error) {
 
         console.error(
-            "Error al cargar datos:",
+            "Error al cargar:",
             error
         );
 
@@ -78,7 +76,7 @@ function loadBrands() {
 
 
 // ============================================
-// GUARDAR
+// GUARDAR DATOS
 // ============================================
 
 function saveBrands() {
@@ -113,228 +111,6 @@ function createBrand(name, color) {
 
 
     brands.push(brand);
-
-    saveBrands();
-
-    renderBrands();
-
-}
-
-
-// ============================================
-// ABRIR CARPETA
-// ============================================
-
-function openBrand(id) {
-
-    const brand =
-        brands.find(
-            brand => brand.id === id
-        );
-
-
-    if (!brand) {
-
-        return;
-
-    }
-
-
-    currentBrandId = id;
-
-
-    const homeView =
-        document.querySelector(
-            "#home-view"
-        );
-
-
-    const brandView =
-        document.querySelector(
-            "#brand-view"
-        );
-
-
-    const brandTitle =
-        document.querySelector(
-            "#brand-title"
-        );
-
-
-    const brandCount =
-        document.querySelector(
-            "#brand-perfume-count"
-        );
-
-
-    const brandIcon =
-        document.querySelector(
-            "#brand-icon"
-        );
-
-
-    homeView.style.display =
-        "none";
-
-
-    brandView.style.display =
-        "block";
-
-
-    brandTitle.textContent =
-        brand.name;
-
-
-    brandIcon.style.color =
-        brand.color;
-
-
-    renderNotes();
-
-
-    brandCount.textContent =
-        brand.notes.length +
-        " notas";
-
-}
-
-
-// ============================================
-// VOLVER A CARPETAS
-// ============================================
-
-function closeBrand() {
-
-    const homeView =
-        document.querySelector(
-            "#home-view"
-        );
-
-
-    const brandView =
-        document.querySelector(
-            "#brand-view"
-        );
-
-
-    const noteView =
-        document.querySelector(
-            "#note-view"
-        );
-
-
-    noteView.style.display =
-        "none";
-
-
-    brandView.style.display =
-        "none";
-
-
-    homeView.style.display =
-        "block";
-
-
-    currentBrandId = null;
-
-}
-
-
-// ============================================
-// ELIMINAR CARPETA
-// ============================================
-
-function deleteBrand(id) {
-
-    const brand =
-        brands.find(
-            brand => brand.id === id
-        );
-
-
-    if (!brand) {
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            "¿Eliminar la carpeta " +
-            brand.name +
-            "?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    brands =
-        brands.filter(
-            brand => brand.id !== id
-        );
-
-
-    saveBrands();
-
-    renderBrands();
-
-}
-
-
-// ============================================
-// EDITAR CARPETA
-// ============================================
-
-function editBrand(id) {
-
-    const brand =
-        brands.find(
-            brand => brand.id === id
-        );
-
-
-    if (!brand) {
-
-        return;
-
-    }
-
-
-    const newName =
-        prompt(
-            "Nuevo nombre:",
-            brand.name
-        );
-
-
-    if (newName) {
-
-        brand.name =
-            newName;
-
-    }
-
-
-    const newColor =
-        prompt(
-            "Nuevo color HEX:",
-            brand.color
-        );
-
-
-    if (newColor) {
-
-        brand.color =
-            newColor;
-
-    }
-
 
     saveBrands();
 
@@ -427,8 +203,6 @@ function renderBrands() {
             `;
 
 
-            // Abrir carpeta
-
             card.addEventListener(
                 "click",
                 function() {
@@ -440,8 +214,6 @@ function renderBrands() {
                 }
             );
 
-
-            // Editar
 
             const editButton =
                 card.querySelector(
@@ -462,8 +234,6 @@ function renderBrands() {
                 }
             );
 
-
-            // Eliminar
 
             const deleteButton =
                 card.querySelector(
@@ -489,7 +259,6 @@ function renderBrands() {
                 card
             );
 
-
         }
     );
 
@@ -497,14 +266,14 @@ function renderBrands() {
 
 
 // ============================================
-// CREAR NOTA
+// ABRIR CARPETA
 // ============================================
 
-function createNote() {
+function openBrand(id) {
 
     const brand =
         brands.find(
-            brand => brand.id === currentBrandId
+            brand => brand.id === id
         );
 
 
@@ -515,44 +284,184 @@ function createNote() {
     }
 
 
-    const title =
-        prompt(
-            "Título de la nota:"
+    currentBrandId = id;
+
+
+    document.querySelector(
+        "#home-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-editor-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#brand-view"
+    ).style.display =
+        "block";
+
+
+    document.querySelector(
+        "#brand-title"
+    ).textContent =
+        brand.name;
+
+
+    document.querySelector(
+        "#brand-icon"
+    ).style.color =
+        brand.color;
+
+
+    renderNotes();
+
+}
+
+
+// ============================================
+// VOLVER AL INICIO
+// ============================================
+
+function closeBrand() {
+
+    document.querySelector(
+        "#brand-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-editor-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#home-view"
+    ).style.display =
+        "block";
+
+
+    currentBrandId = null;
+
+}
+
+
+// ============================================
+// EDITAR CARPETA
+// ============================================
+
+function editBrand(id) {
+
+    const brand =
+        brands.find(
+            brand => brand.id === id
         );
 
 
-    if (!title) {
+    if (!brand) {
 
         return;
 
     }
 
 
-    const content =
+    const newName =
         prompt(
-            "Contenido de la nota:"
+            "Nuevo nombre:",
+            brand.name
         );
 
 
-    const note = {
+    if (newName) {
 
-        id: Date.now(),
+        brand.name =
+            newName;
 
-        title: title,
-
-        content: content || ""
-
-    };
+    }
 
 
-    brand.notes.push(
-        note
-    );
+    const newColor =
+        prompt(
+            "Nuevo color HEX:",
+            brand.color
+        );
+
+
+    if (newColor) {
+
+        brand.color =
+            newColor;
+
+    }
 
 
     saveBrands();
 
-    renderNotes();
+    renderBrands();
+
+}
+
+
+// ============================================
+// ELIMINAR CARPETA
+// ============================================
+
+function deleteBrand(id) {
+
+    const brand =
+        brands.find(
+            brand => brand.id === id
+        );
+
+
+    if (!brand) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "¿Eliminar la carpeta " +
+            brand.name +
+            "?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    brands =
+        brands.filter(
+            brand => brand.id !== id
+        );
+
+
+    saveBrands();
+
+    renderBrands();
 
 }
 
@@ -650,14 +559,21 @@ function renderNotes() {
                 <div>
 
                     <div class="brand-name">
-                        ${note.title}
+                        ${escapeHTML(note.title)}
                     </div>
 
 
                     <div class="brand-count">
-                        ${note.content
-                            ? note.content.substring(0, 60)
-                            : "Sin contenido"}
+                        ${
+                            note.content
+                                ? escapeHTML(
+                                    note.content.substring(
+                                        0,
+                                        60
+                                    )
+                                )
+                                : "Sin contenido"
+                        }
                     </div>
 
                 </div>
@@ -677,8 +593,6 @@ function renderNotes() {
             `;
 
 
-            // Abrir nota
-
             card.addEventListener(
                 "click",
                 function() {
@@ -690,8 +604,6 @@ function renderNotes() {
                 }
             );
 
-
-            // Eliminar nota
 
             const deleteButton =
                 card.querySelector(
@@ -705,7 +617,6 @@ function renderNotes() {
 
                     event.stopPropagation();
 
-
                     deleteNote(
                         note.id
                     );
@@ -717,7 +628,6 @@ function renderNotes() {
             container.appendChild(
                 card
             );
-
 
         }
     );
@@ -760,43 +670,33 @@ function openNote(id) {
     currentNoteId = id;
 
 
-    const brandView =
-        document.querySelector(
-            "#brand-view"
-        );
-
-
-    const noteView =
-        document.querySelector(
-            "#note-view"
-        );
-
-
-    const title =
-        document.querySelector(
-            "#note-detail-title"
-        );
-
-
-    const content =
-        document.querySelector(
-            "#note-detail-content"
-        );
-
-
-    brandView.style.display =
+    document.querySelector(
+        "#brand-view"
+    ).style.display =
         "none";
 
 
-    noteView.style.display =
+    document.querySelector(
+        "#note-editor-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-view"
+    ).style.display =
         "block";
 
 
-    title.textContent =
+    document.querySelector(
+        "#note-detail-title"
+    ).textContent =
         note.title;
 
 
-    content.textContent =
+    document.querySelector(
+        "#note-detail-content"
+    ).textContent =
         note.content ||
         "Esta nota está vacía.";
 
@@ -809,23 +709,15 @@ function openNote(id) {
 
 function closeNote() {
 
-    const noteView =
-        document.querySelector(
-            "#note-view"
-        );
-
-
-    const brandView =
-        document.querySelector(
-            "#brand-view"
-        );
-
-
-    noteView.style.display =
+    document.querySelector(
+        "#note-view"
+    ).style.display =
         "none";
 
 
-    brandView.style.display =
+    document.querySelector(
+        "#brand-view"
+    ).style.display =
         "block";
 
 
@@ -835,10 +727,56 @@ function closeNote() {
 
 
 // ============================================
-// EDITAR NOTA
+// ABRIR EDITOR PARA CREAR
 // ============================================
 
-function editNote() {
+function openNewNoteEditor() {
+
+    editingNoteId = null;
+
+
+    document.querySelector(
+        "#editor-title"
+    ).textContent =
+        "Nueva nota";
+
+
+    document.querySelector(
+        "#note-title-input"
+    ).value =
+        "";
+
+
+    document.querySelector(
+        "#note-content-input"
+    ).value =
+        "";
+
+
+    document.querySelector(
+        "#brand-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-editor-view"
+    ).style.display =
+        "block";
+
+
+    document.querySelector(
+        "#note-title-input"
+    ).focus();
+
+}
+
+
+// ============================================
+// ABRIR EDITOR PARA EDITAR
+// ============================================
+
+function openEditNoteEditor() {
 
     const brand =
         brands.find(
@@ -866,41 +804,201 @@ function editNote() {
     }
 
 
-    const newTitle =
-        prompt(
-            "Título:",
-            note.title
+    editingNoteId =
+        note.id;
+
+
+    document.querySelector(
+        "#editor-title"
+    ).textContent =
+        "Editar nota";
+
+
+    document.querySelector(
+        "#note-title-input"
+    ).value =
+        note.title;
+
+
+    document.querySelector(
+        "#note-content-input"
+    ).value =
+        note.content;
+
+
+    document.querySelector(
+        "#note-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-editor-view"
+    ).style.display =
+        "block";
+
+
+    document.querySelector(
+        "#note-title-input"
+    ).focus();
+
+}
+
+
+// ============================================
+// GUARDAR NOTA
+// ============================================
+
+function saveNoteFromEditor() {
+
+    const brand =
+        brands.find(
+            brand => brand.id === currentBrandId
         );
 
 
-    if (newTitle) {
+    if (!brand) {
 
-        note.title =
-            newTitle;
+        return;
 
     }
 
 
-    const newContent =
-        prompt(
-            "Contenido:",
-            note.content
+    const titleInput =
+        document.querySelector(
+            "#note-title-input"
         );
 
 
-    if (newContent !== null) {
+    const contentInput =
+        document.querySelector(
+            "#note-content-input"
+        );
 
-        note.content =
-            newContent;
+
+    const title =
+        titleInput.value.trim();
+
+
+    const content =
+        contentInput.value;
+
+
+    if (!title) {
+
+        alert(
+            "La nota necesita un título."
+        );
+
+
+        titleInput.focus();
+
+
+        return;
+
+    }
+
+
+    // EDITAR NOTA EXISTENTE
+
+    if (editingNoteId !== null) {
+
+        const note =
+            brand.notes.find(
+                note =>
+                    note.id === editingNoteId
+            );
+
+
+        if (note) {
+
+            note.title =
+                title;
+
+            note.content =
+                content;
+
+        }
+
+    }
+
+
+    // CREAR NOTA NUEVA
+
+    else {
+
+        const newNote = {
+
+            id: Date.now(),
+
+            title: title,
+
+            content: content
+
+        };
+
+
+        brand.notes.push(
+            newNote
+        );
+
+
+        currentNoteId =
+            newNote.id;
 
     }
 
 
     saveBrands();
 
+
+    document.querySelector(
+        "#note-editor-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-view"
+    ).style.display =
+        "block";
+
+
     openNote(
-        note.id
+        currentNoteId
     );
+
+
+    renderNotes();
+
+}
+
+
+// ============================================
+// CANCELAR EDITOR
+// ============================================
+
+function cancelNoteEditor() {
+
+    document.querySelector(
+        "#note-editor-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#note-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#brand-view"
+    ).style.display =
+        "block";
+
+
+    editingNoteId = null;
 
 }
 
@@ -947,6 +1045,42 @@ function deleteNote(id) {
 
     renderNotes();
 
+
+    document.querySelector(
+        "#note-view"
+    ).style.display =
+        "none";
+
+
+    document.querySelector(
+        "#brand-view"
+    ).style.display =
+        "block";
+
+
+    currentNoteId = null;
+
+}
+
+
+// ============================================
+// ESCAPAR HTML
+// ============================================
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        text;
+
+
+    return div.innerHTML;
+
 }
 
 
@@ -958,7 +1092,7 @@ function setupAddButton() {
 
     const button =
         document.querySelector(
-            ".add-button"
+            "body > main > .add-button"
         );
 
 
@@ -972,7 +1106,6 @@ function setupAddButton() {
     button.addEventListener(
         "click",
         function() {
-
 
             const name =
                 prompt(
@@ -999,7 +1132,6 @@ function setupAddButton() {
                 color ||
                 "#b8ff3d"
             );
-
 
         }
     );
@@ -1030,7 +1162,7 @@ function setupAddNoteButton() {
         "click",
         function() {
 
-            createNote();
+            openNewNoteEditor();
 
         }
     );
@@ -1053,6 +1185,18 @@ function setupBackButtons() {
     const noteBack =
         document.querySelector(
             "#note-back-button"
+        );
+
+
+    const cancelButton =
+        document.querySelector(
+            "#cancel-note-button"
+        );
+
+
+    const cancelEditor =
+        document.querySelector(
+            "#cancel-editor-button"
         );
 
 
@@ -1083,11 +1227,39 @@ function setupBackButtons() {
 
     }
 
+
+    if (cancelButton) {
+
+        cancelButton.addEventListener(
+            "click",
+            function() {
+
+                cancelNoteEditor();
+
+            }
+        );
+
+    }
+
+
+    if (cancelEditor) {
+
+        cancelEditor.addEventListener(
+            "click",
+            function() {
+
+                cancelNoteEditor();
+
+            }
+        );
+
+    }
+
 }
 
 
 // ============================================
-// BOTONES DE NOTA
+// ACCIONES DE NOTA
 // ============================================
 
 function setupNoteActions() {
@@ -1104,13 +1276,19 @@ function setupNoteActions() {
         );
 
 
+    const saveButton =
+        document.querySelector(
+            "#save-note-button"
+        );
+
+
     if (editButton) {
 
         editButton.addEventListener(
             "click",
             function() {
 
-                editNote();
+                openEditNoteEditor();
 
             }
         );
@@ -1124,20 +1302,27 @@ function setupNoteActions() {
             "click",
             function() {
 
+                if (currentNoteId) {
 
-                if (!currentNoteId) {
-
-                    return;
+                    deleteNote(
+                        currentNoteId
+                    );
 
                 }
 
+            }
+        );
 
-                deleteNote(
-                    currentNoteId
-                );
+    }
 
 
-                closeNote();
+    if (saveButton) {
+
+        saveButton.addEventListener(
+            "click",
+            function() {
+
+                saveNoteFromEditor();
 
             }
         );
@@ -1148,22 +1333,9 @@ function setupNoteActions() {
 
 
 // ============================================
-// INICIAR APP
+// INICIAR
 // ============================================
 
 document.addEventListener(
     "DOMContentLoaded",
-    function() {
-
-        renderBrands();
-
-        setupAddButton();
-
-        setupAddNoteButton();
-
-        setupBackButtons();
-
-        setupNoteActions();
-
-    }
-);
+    function() 
