@@ -1,6 +1,6 @@
 // ============================================
 // noteDRASI
-// Sistema de marcas
+// Carpetas + notas
 // ============================================
 
 
@@ -9,10 +9,14 @@ const STORAGE_KEY = "notedrasi_brands";
 
 let brands = loadBrands();
 
+let currentBrandId = null;
 
-// --------------------------------------------
-// CARGAR MARCAS
-// --------------------------------------------
+let currentNoteId = null;
+
+
+// ============================================
+// CARGAR DATOS
+// ============================================
 
 function loadBrands() {
 
@@ -29,14 +33,42 @@ function loadBrands() {
 
     try {
 
-        return JSON.parse(saved);
+        const data =
+            JSON.parse(saved);
+
+
+        // Compatibilidad con carpetas
+        // creadas anteriormente
+
+        data.forEach(
+            brand => {
+
+                if (!Array.isArray(brand.perfumes)) {
+
+                    brand.perfumes = [];
+
+                }
+
+
+                if (!Array.isArray(brand.notes)) {
+
+                    brand.notes = [];
+
+                }
+
+            }
+        );
+
+
+        return data;
 
     } catch (error) {
 
         console.error(
-            "Error al cargar marcas:",
+            "Error al cargar datos:",
             error
         );
+
 
         return [];
 
@@ -45,9 +77,9 @@ function loadBrands() {
 }
 
 
-// --------------------------------------------
-// GUARDAR MARCAS
-// --------------------------------------------
+// ============================================
+// GUARDAR
+// ============================================
 
 function saveBrands() {
 
@@ -59,9 +91,9 @@ function saveBrands() {
 }
 
 
-// --------------------------------------------
-// CREAR MARCA
-// --------------------------------------------
+// ============================================
+// CREAR CARPETA
+// ============================================
 
 function createBrand(name, color) {
 
@@ -73,7 +105,9 @@ function createBrand(name, color) {
 
         color: color || "#b8ff3d",
 
-        perfumes: []
+        perfumes: [],
+
+        notes: []
 
     };
 
@@ -87,9 +121,9 @@ function createBrand(name, color) {
 }
 
 
-// --------------------------------------------
-// ABRIR MARCA
-// --------------------------------------------
+// ============================================
+// ABRIR CARPETA
+// ============================================
 
 function openBrand(id) {
 
@@ -104,6 +138,9 @@ function openBrand(id) {
         return;
 
     }
+
+
+    currentBrandId = id;
 
 
     const homeView =
@@ -148,20 +185,23 @@ function openBrand(id) {
         brand.name;
 
 
-    brandCount.textContent =
-        brand.perfumes.length +
-        " perfumes";
-
-
     brandIcon.style.color =
         brand.color;
+
+
+    renderNotes();
+
+
+    brandCount.textContent =
+        brand.notes.length +
+        " notas";
 
 }
 
 
-// --------------------------------------------
-// VOLVER A MARCAS
-// --------------------------------------------
+// ============================================
+// VOLVER A CARPETAS
+// ============================================
 
 function closeBrand() {
 
@@ -177,6 +217,16 @@ function closeBrand() {
         );
 
 
+    const noteView =
+        document.querySelector(
+            "#note-view"
+        );
+
+
+    noteView.style.display =
+        "none";
+
+
     brandView.style.display =
         "none";
 
@@ -184,12 +234,15 @@ function closeBrand() {
     homeView.style.display =
         "block";
 
+
+    currentBrandId = null;
+
 }
 
 
-// --------------------------------------------
-// ELIMINAR MARCA
-// --------------------------------------------
+// ============================================
+// ELIMINAR CARPETA
+// ============================================
 
 function deleteBrand(id) {
 
@@ -234,9 +287,9 @@ function deleteBrand(id) {
 }
 
 
-// --------------------------------------------
-// EDITAR MARCA
-// --------------------------------------------
+// ============================================
+// EDITAR CARPETA
+// ============================================
 
 function editBrand(id) {
 
@@ -290,9 +343,9 @@ function editBrand(id) {
 }
 
 
-// --------------------------------------------
-// MOSTRAR MARCAS
-// --------------------------------------------
+// ============================================
+// MOSTRAR CARPETAS
+// ============================================
 
 function renderBrands() {
 
@@ -345,8 +398,8 @@ function renderBrands() {
 
 
                     <div class="brand-count">
-                        ${brand.perfumes.length}
-                        perfumes
+                        ${brand.notes.length}
+                        notas
                     </div>
 
                 </div>
@@ -443,9 +496,463 @@ function renderBrands() {
 }
 
 
-// --------------------------------------------
-// BOTÓN AGREGAR MARCA
-// --------------------------------------------
+// ============================================
+// CREAR NOTA
+// ============================================
+
+function createNote() {
+
+    const brand =
+        brands.find(
+            brand => brand.id === currentBrandId
+        );
+
+
+    if (!brand) {
+
+        return;
+
+    }
+
+
+    const title =
+        prompt(
+            "Título de la nota:"
+        );
+
+
+    if (!title) {
+
+        return;
+
+    }
+
+
+    const content =
+        prompt(
+            "Contenido de la nota:"
+        );
+
+
+    const note = {
+
+        id: Date.now(),
+
+        title: title,
+
+        content: content || ""
+
+    };
+
+
+    brand.notes.push(
+        note
+    );
+
+
+    saveBrands();
+
+    renderNotes();
+
+}
+
+
+// ============================================
+// MOSTRAR NOTAS
+// ============================================
+
+function renderNotes() {
+
+    const brand =
+        brands.find(
+            brand => brand.id === currentBrandId
+        );
+
+
+    if (!brand) {
+
+        return;
+
+    }
+
+
+    const container =
+        document.querySelector(
+            "#note-grid"
+        );
+
+
+    const count =
+        document.querySelector(
+            "#brand-perfume-count"
+        );
+
+
+    container.innerHTML = "";
+
+
+    count.textContent =
+        brand.notes.length +
+        " notas";
+
+
+    if (
+        brand.notes.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📝
+                </div>
+
+                <div class="empty-title">
+                    Todavía no hay notas
+                </div>
+
+                <div class="empty-text">
+                    Tocá + para crear tu primera nota.
+                </div>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    brand.notes.forEach(
+        function(note) {
+
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "brand-card";
+
+
+            card.innerHTML = `
+
+                <div class="brand-icon">
+                    📝
+                </div>
+
+
+                <div>
+
+                    <div class="brand-name">
+                        ${note.title}
+                    </div>
+
+
+                    <div class="brand-count">
+                        ${note.content
+                            ? note.content.substring(0, 60)
+                            : "Sin contenido"}
+                    </div>
+
+                </div>
+
+
+                <div class="brand-actions">
+
+                    <button
+                        class="delete-note"
+                        type="button"
+                    >
+                        🗑️
+                    </button>
+
+                </div>
+
+            `;
+
+
+            // Abrir nota
+
+            card.addEventListener(
+                "click",
+                function() {
+
+                    openNote(
+                        note.id
+                    );
+
+                }
+            );
+
+
+            // Eliminar nota
+
+            const deleteButton =
+                card.querySelector(
+                    ".delete-note"
+                );
+
+
+            deleteButton.addEventListener(
+                "click",
+                function(event) {
+
+                    event.stopPropagation();
+
+
+                    deleteNote(
+                        note.id
+                    );
+
+                }
+            );
+
+
+            container.appendChild(
+                card
+            );
+
+
+        }
+    );
+
+}
+
+
+// ============================================
+// ABRIR NOTA
+// ============================================
+
+function openNote(id) {
+
+    const brand =
+        brands.find(
+            brand => brand.id === currentBrandId
+        );
+
+
+    if (!brand) {
+
+        return;
+
+    }
+
+
+    const note =
+        brand.notes.find(
+            note => note.id === id
+        );
+
+
+    if (!note) {
+
+        return;
+
+    }
+
+
+    currentNoteId = id;
+
+
+    const brandView =
+        document.querySelector(
+            "#brand-view"
+        );
+
+
+    const noteView =
+        document.querySelector(
+            "#note-view"
+        );
+
+
+    const title =
+        document.querySelector(
+            "#note-detail-title"
+        );
+
+
+    const content =
+        document.querySelector(
+            "#note-detail-content"
+        );
+
+
+    brandView.style.display =
+        "none";
+
+
+    noteView.style.display =
+        "block";
+
+
+    title.textContent =
+        note.title;
+
+
+    content.textContent =
+        note.content ||
+        "Esta nota está vacía.";
+
+}
+
+
+// ============================================
+// VOLVER DE NOTA
+// ============================================
+
+function closeNote() {
+
+    const noteView =
+        document.querySelector(
+            "#note-view"
+        );
+
+
+    const brandView =
+        document.querySelector(
+            "#brand-view"
+        );
+
+
+    noteView.style.display =
+        "none";
+
+
+    brandView.style.display =
+        "block";
+
+
+    currentNoteId = null;
+
+}
+
+
+// ============================================
+// EDITAR NOTA
+// ============================================
+
+function editNote() {
+
+    const brand =
+        brands.find(
+            brand => brand.id === currentBrandId
+        );
+
+
+    if (!brand) {
+
+        return;
+
+    }
+
+
+    const note =
+        brand.notes.find(
+            note => note.id === currentNoteId
+        );
+
+
+    if (!note) {
+
+        return;
+
+    }
+
+
+    const newTitle =
+        prompt(
+            "Título:",
+            note.title
+        );
+
+
+    if (newTitle) {
+
+        note.title =
+            newTitle;
+
+    }
+
+
+    const newContent =
+        prompt(
+            "Contenido:",
+            note.content
+        );
+
+
+    if (newContent !== null) {
+
+        note.content =
+            newContent;
+
+    }
+
+
+    saveBrands();
+
+    openNote(
+        note.id
+    );
+
+}
+
+
+// ============================================
+// ELIMINAR NOTA
+// ============================================
+
+function deleteNote(id) {
+
+    const brand =
+        brands.find(
+            brand => brand.id === currentBrandId
+        );
+
+
+    if (!brand) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "¿Eliminar esta nota?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    brand.notes =
+        brand.notes.filter(
+            note => note.id !== id
+        );
+
+
+    saveBrands();
+
+    renderNotes();
+
+}
+
+
+// ============================================
+// BOTÓN AGREGAR CARPETA
+// ============================================
 
 function setupAddButton() {
 
@@ -469,7 +976,7 @@ function setupAddButton() {
 
             const name =
                 prompt(
-                    "Nombre de la marca:"
+                    "Nombre de la carpeta:"
                 );
 
 
@@ -500,15 +1007,15 @@ function setupAddButton() {
 }
 
 
-// --------------------------------------------
-// BOTÓN VOLVER
-// --------------------------------------------
+// ============================================
+// BOTÓN AGREGAR NOTA
+// ============================================
 
-function setupBackButton() {
+function setupAddNoteButton() {
 
     const button =
         document.querySelector(
-            "#back-button"
+            "#add-note-button"
         );
 
 
@@ -523,7 +1030,7 @@ function setupBackButton() {
         "click",
         function() {
 
-            closeBrand();
+            createNote();
 
         }
     );
@@ -531,9 +1038,118 @@ function setupBackButton() {
 }
 
 
-// --------------------------------------------
+// ============================================
+// BOTONES VOLVER
+// ============================================
+
+function setupBackButtons() {
+
+    const brandBack =
+        document.querySelector(
+            "#back-button"
+        );
+
+
+    const noteBack =
+        document.querySelector(
+            "#note-back-button"
+        );
+
+
+    if (brandBack) {
+
+        brandBack.addEventListener(
+            "click",
+            function() {
+
+                closeBrand();
+
+            }
+        );
+
+    }
+
+
+    if (noteBack) {
+
+        noteBack.addEventListener(
+            "click",
+            function() {
+
+                closeNote();
+
+            }
+        );
+
+    }
+
+}
+
+
+// ============================================
+// BOTONES DE NOTA
+// ============================================
+
+function setupNoteActions() {
+
+    const editButton =
+        document.querySelector(
+            "#edit-note-button"
+        );
+
+
+    const deleteButton =
+        document.querySelector(
+            "#delete-note-button"
+        );
+
+
+    if (editButton) {
+
+        editButton.addEventListener(
+            "click",
+            function() {
+
+                editNote();
+
+            }
+        );
+
+    }
+
+
+    if (deleteButton) {
+
+        deleteButton.addEventListener(
+            "click",
+            function() {
+
+
+                if (!currentNoteId) {
+
+                    return;
+
+                }
+
+
+                deleteNote(
+                    currentNoteId
+                );
+
+
+                closeNote();
+
+            }
+        );
+
+    }
+
+}
+
+
+// ============================================
 // INICIAR APP
-// --------------------------------------------
+// ============================================
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -543,7 +1159,11 @@ document.addEventListener(
 
         setupAddButton();
 
-        setupBackButton();
+        setupAddNoteButton();
+
+        setupBackButtons();
+
+        setupNoteActions();
 
     }
 );
