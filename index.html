@@ -25,6 +25,10 @@
     <main class="app">
 
 
+        <!-- ================================= -->
+        <!-- ENCABEZADO -->
+        <!-- ================================= -->
+
         <header class="header">
 
             <div>
@@ -34,7 +38,7 @@
                 </div>
 
                 <div class="subtitle">
-                    Personal fragrance archive
+                    Personal notes
                 </div>
 
             </div>
@@ -42,12 +46,14 @@
         </header>
 
 
+        <!-- ================================= -->
         <!-- PANTALLA PRINCIPAL -->
+        <!-- ================================= -->
 
         <section id="home-view">
 
             <h1 class="section-title">
-                Perfumes Fichados
+                Mis carpetas
             </h1>
 
 
@@ -64,12 +70,16 @@
         </section>
 
 
-        <!-- PANTALLA DE MARCA -->
+
+        <!-- ================================= -->
+        <!-- PANTALLA DE CARPETA -->
+        <!-- ================================= -->
 
         <section
             id="brand-view"
             style="display: none;"
         >
+
 
             <button
                 id="back-button"
@@ -91,49 +101,121 @@
 
 
                 <h2 id="brand-title">
-                    Marca
+                    Carpeta
                 </h2>
 
 
                 <p id="brand-perfume-count">
-                    0 perfumes
+                    0 notas
                 </p>
 
             </div>
 
 
+            <!-- NOTAS -->
+
             <div
-                id="perfume-grid"
+                id="note-grid"
                 class="perfume-grid"
             >
 
-                <div class="empty-state">
-
-                    <div class="empty-icon">
-                        🧴
-                    </div>
-
-                    <div class="empty-title">
-                        Todavía no hay perfumes
-                    </div>
-
-                    <div class="empty-text">
-                        Próximamente podrás agregarlos acá.
-                    </div>
-
-                </div>
-
             </div>
+
+
+            <!-- AGREGAR NOTA -->
+
+            <button
+                id="add-note-button"
+                class="add-button"
+                type="button"
+                aria-label="Agregar nota"
+            >
+                +
+            </button>
 
 
         </section>
 
 
-        <!-- BOTÓN AGREGAR MARCA -->
+
+        <!-- ================================= -->
+        <!-- PANTALLA DE NOTA -->
+        <!-- ================================= -->
+
+        <section
+            id="note-view"
+            style="display: none;"
+        >
+
+
+            <button
+                id="note-back-button"
+                class="back-button"
+                type="button"
+            >
+                ← Volver
+            </button>
+
+
+            <article class="note-detail">
+
+
+                <div
+                    id="note-detail-icon"
+                    class="brand-icon"
+                >
+                    📝
+                </div>
+
+
+                <h2 id="note-detail-title">
+                    Nota
+                </h2>
+
+
+                <div
+                    id="note-detail-content"
+                    class="note-content"
+                >
+                </div>
+
+
+                <div class="note-actions">
+
+
+                    <button
+                        id="edit-note-button"
+                        type="button"
+                    >
+                        ✏️ Editar
+                    </button>
+
+
+                    <button
+                        id="delete-note-button"
+                        type="button"
+                    >
+                        🗑️ Eliminar
+                    </button>
+
+
+                </div>
+
+
+            </article>
+
+
+        </section>
+
+
+
+        <!-- ================================= -->
+        <!-- BOTÓN AGREGAR CARPETA -->
+        <!-- ================================= -->
 
         <button
             class="add-button"
-            aria-label="Agregar marca"
+            aria-label="Agregar carpeta"
             type="button"
         >
             +
