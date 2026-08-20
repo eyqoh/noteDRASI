@@ -1,0 +1,164 @@
+:root {
+    --background: #111111;
+    --surface: #1a1a1a;
+    --text: #f5f5f5;
+    --muted: #999999;
+    --accent: #b8ff3d;
+    --border: #2a2a2a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+}
+
+.app {
+    width: min(1200px, 100%);
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 48px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.logo span {
+    font-weight: 400;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.section-title {
+    font-size: 32px;
+    margin: 0 0 24px;
+    letter-spacing: -1.5px;
+}
+
+.search {
+    width: 100%;
+    padding: 14px 16px;
+    margin-bottom: 24px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    font-size: 15px;
+}
+
+.brand-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.brand-card {
+    min-height: 150px;
+
+    padding: 20px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.brand-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+}
+
+.brand-icon {
+    font-size: 30px;
+}
+
+.brand-name {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.brand-count {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.add-button {
+    position: fixed;
+
+    right: 24px;
+    bottom: 24px;
+
+    width: 58px;
+    height: 58px;
+
+    border: none;
+    border-radius: 18px;
+
+    background: var(--accent);
+    color: #111111;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 600px) {
+
+    .app {
+        padding: 24px 16px 100px;
+    }
+
+    .header {
+        margin-bottom: 36px;
+    }
+
+    .section-title {
+        font-size: 28px;
+    }
+
+    .brand-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .brand-card {
+        min-height: 135px;
+        padding: 15px;
+    }
+
+}
