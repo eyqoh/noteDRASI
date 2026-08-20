@@ -22,210 +22,260 @@
 
 <body>
 
-    <main class="app">
+<main class="app">
 
 
-        <!-- ================================= -->
-        <!-- ENCABEZADO -->
-        <!-- ================================= -->
+    <!-- =============================== -->
+    <!-- ENCABEZADO -->
+    <!-- =============================== -->
 
-        <header class="header">
+    <header class="header">
 
-            <div>
+        <div>
 
-                <div class="logo">
-                    note<span>DRASI</span>
-                </div>
-
-                <div class="subtitle">
-                    Personal notes
-                </div>
-
+            <div class="logo">
+                note<span>DRASI</span>
             </div>
 
-        </header>
+            <div class="subtitle">
+                Personal notes
+            </div>
+
+        </div>
+
+    </header>
 
 
-        <!-- ================================= -->
-        <!-- PANTALLA PRINCIPAL -->
-        <!-- ================================= -->
+    <!-- =============================== -->
+    <!-- INICIO -->
+    <!-- =============================== -->
 
-        <section id="home-view">
+    <section id="home-view">
 
-            <h1 class="section-title">
-                Mis carpetas
-            </h1>
+        <h1 class="section-title">
+            Mis carpetas
+        </h1>
 
-
-            <input
-                class="search"
-                type="search"
-                placeholder="🔎 Buscar..."
-            >
-
-
-            <div class="brand-grid"></div>
-
-
-        </section>
-
-
-
-        <!-- ================================= -->
-        <!-- PANTALLA DE CARPETA -->
-        <!-- ================================= -->
-
-        <section
-            id="brand-view"
-            style="display: none;"
+        <input
+            class="search"
+            type="search"
+            placeholder="🔎 Buscar..."
         >
 
+        <div class="brand-grid"></div>
 
-            <button
-                id="back-button"
-                class="back-button"
-                type="button"
-            >
-                ← Volver
-            </button>
+    </section>
 
 
-            <div class="brand-header">
+    <!-- =============================== -->
+    <!-- CARPETA -->
+    <!-- =============================== -->
 
-                <div
-                    id="brand-icon"
-                    class="brand-icon"
-                >
-                    📁
-                </div>
-
-
-                <h2 id="brand-title">
-                    Carpeta
-                </h2>
-
-
-                <p id="brand-perfume-count">
-                    0 notas
-                </p>
-
-            </div>
-
-
-            <!-- NOTAS -->
-
-            <div
-                id="note-grid"
-                class="perfume-grid"
-            >
-
-            </div>
-
-
-            <!-- AGREGAR NOTA -->
-
-            <button
-                id="add-note-button"
-                class="add-button"
-                type="button"
-                aria-label="Agregar nota"
-            >
-                +
-            </button>
-
-
-        </section>
-
-
-
-        <!-- ================================= -->
-        <!-- PANTALLA DE NOTA -->
-        <!-- ================================= -->
-
-        <section
-            id="note-view"
-            style="display: none;"
-        >
-
-
-            <button
-                id="note-back-button"
-                class="back-button"
-                type="button"
-            >
-                ← Volver
-            </button>
-
-
-            <article class="note-detail">
-
-
-                <div
-                    id="note-detail-icon"
-                    class="brand-icon"
-                >
-                    📝
-                </div>
-
-
-                <h2 id="note-detail-title">
-                    Nota
-                </h2>
-
-
-                <div
-                    id="note-detail-content"
-                    class="note-content"
-                >
-                </div>
-
-
-                <div class="note-actions">
-
-
-                    <button
-                        id="edit-note-button"
-                        type="button"
-                    >
-                        ✏️ Editar
-                    </button>
-
-
-                    <button
-                        id="delete-note-button"
-                        type="button"
-                    >
-                        🗑️ Eliminar
-                    </button>
-
-
-                </div>
-
-
-            </article>
-
-
-        </section>
-
-
-
-        <!-- ================================= -->
-        <!-- BOTÓN AGREGAR CARPETA -->
-        <!-- ================================= -->
+    <section
+        id="brand-view"
+        style="display: none;"
+    >
 
         <button
-            class="add-button"
-            aria-label="Agregar carpeta"
+            id="back-button"
+            class="back-button"
             type="button"
+        >
+            ← Volver
+        </button>
+
+
+        <div class="brand-header">
+
+            <div
+                id="brand-icon"
+                class="brand-icon"
+            >
+                📁
+            </div>
+
+            <h2 id="brand-title">
+                Carpeta
+            </h2>
+
+            <p id="brand-perfume-count">
+                0 notas
+            </p>
+
+        </div>
+
+
+        <div
+            id="note-grid"
+            class="perfume-grid"
+        ></div>
+
+
+        <button
+            id="add-note-button"
+            class="add-button"
+            type="button"
+            aria-label="Agregar nota"
         >
             +
         </button>
 
+    </section>
 
-    </main>
+
+    <!-- =============================== -->
+    <!-- DETALLE DE NOTA -->
+    <!-- =============================== -->
+
+    <section
+        id="note-view"
+        style="display: none;"
+    >
+
+        <button
+            id="note-back-button"
+            class="back-button"
+            type="button"
+        >
+            ← Volver
+        </button>
 
 
-    <script src="app.js"></script>
+        <article class="note-detail">
+
+            <div
+                id="note-detail-icon"
+                class="brand-icon"
+            >
+                📝
+            </div>
+
+
+            <h2 id="note-detail-title">
+                Nota
+            </h2>
+
+
+            <div
+                id="note-detail-content"
+                class="note-content"
+            ></div>
+
+
+            <div class="note-actions">
+
+                <button
+                    id="edit-note-button"
+                    type="button"
+                >
+                    ✏️ Editar
+                </button>
+
+
+                <button
+                    id="delete-note-button"
+                    type="button"
+                >
+                    🗑️ Eliminar
+                </button>
+
+            </div>
+
+        </article>
+
+    </section>
+
+
+    <!-- =============================== -->
+    <!-- EDITOR DE NOTA -->
+    <!-- =============================== -->
+
+    <section
+        id="note-editor-view"
+        style="display: none;"
+    >
+
+        <button
+            id="cancel-note-button"
+            class="back-button"
+            type="button"
+        >
+            ← Cancelar
+        </button>
+
+
+        <div class="note-editor">
+
+            <h2 id="editor-title">
+                Nueva nota
+            </h2>
+
+
+            <label for="note-title-input">
+                Título
+            </label>
+
+
+            <input
+                id="note-title-input"
+                type="text"
+                placeholder="Título de la nota"
+                autocomplete="off"
+            >
+
+
+            <label for="note-content-input">
+                Contenido
+            </label>
+
+
+            <textarea
+                id="note-content-input"
+                placeholder="Escribí tu nota..."
+            ></textarea>
+
+
+            <div class="editor-actions">
+
+                <button
+                    id="save-note-button"
+                    type="button"
+                >
+                    💾 Guardar
+                </button>
+
+
+                <button
+                    id="cancel-editor-button"
+                    type="button"
+                >
+                    Cancelar
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =============================== -->
+    <!-- AGREGAR CARPETA -->
+    <!-- =============================== -->
+
+    <button
+        class="add-button"
+        aria-label="Agregar carpeta"
+        type="button"
+    >
+        +
+    </button>
+
+
+</main>
+
+
+<script src="app.js"></script>
 
 </body>
 
