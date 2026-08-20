@@ -66,7 +66,6 @@ function createBrand(name, color) {
 
     };
 
-
     brands.push(brand);
 
     saveBrands();
@@ -86,17 +85,79 @@ function openBrand(id) {
         brand => brand.id === id
     );
 
-
     if (!brand) {
         return;
     }
 
+    const brandGrid =
+        document.querySelector(".brand-grid");
 
-    alert(
-        "Abriste la carpeta: " +
-        brand.name +
-        "\n\nPróximamente acá estarán tus perfumes."
-    );
+    const brandView =
+        document.querySelector("#brand-view");
+
+    const sectionTitle =
+        document.querySelector(".section-title");
+
+    const search =
+        document.querySelector(".search");
+
+    const brandTitle =
+        document.querySelector("#brand-title");
+
+    const brandCount =
+        document.querySelector("#brand-perfume-count");
+
+    const brandIcon =
+        document.querySelector("#brand-icon");
+
+
+    brandGrid.classList.add("hidden");
+
+    sectionTitle.classList.add("hidden");
+
+    search.classList.add("hidden");
+
+    brandView.classList.remove("hidden");
+
+
+    brandTitle.textContent =
+        brand.name;
+
+    brandCount.textContent =
+        brand.perfumes.length + " perfumes";
+
+    brandIcon.style.color =
+        brand.color;
+
+}
+
+
+// --------------------------------------------
+// Volver a marcas
+// --------------------------------------------
+
+function closeBrand() {
+
+    const brandGrid =
+        document.querySelector(".brand-grid");
+
+    const brandView =
+        document.querySelector("#brand-view");
+
+    const sectionTitle =
+        document.querySelector(".section-title");
+
+    const search =
+        document.querySelector(".search");
+
+
+    brandView.classList.add("hidden");
+
+    brandGrid.classList.remove("hidden");
+
+    sectionTitle.classList.remove("hidden");
+
+    search.classList.remove("hidden");
 
 }
 
@@ -111,11 +172,9 @@ function deleteBrand(id) {
         brand => brand.id === id
     );
 
-
     if (!brand) {
         return;
     }
-
 
     const confirmed =
         confirm(
@@ -124,16 +183,13 @@ function deleteBrand(id) {
             "?"
         );
 
-
     if (!confirmed) {
         return;
     }
 
-
     brands = brands.filter(
         brand => brand.id !== id
     );
-
 
     saveBrands();
 
@@ -152,11 +208,9 @@ function editBrand(id) {
         brand => brand.id === id
     );
 
-
     if (!brand) {
         return;
     }
-
 
     const newName =
         prompt(
@@ -164,13 +218,9 @@ function editBrand(id) {
             brand.name
         );
 
-
     if (newName) {
-
         brand.name = newName;
-
     }
-
 
     const newColor =
         prompt(
@@ -178,13 +228,9 @@ function editBrand(id) {
             brand.color
         );
 
-
     if (newColor) {
-
         brand.color = newColor;
-
     }
-
 
     saveBrands();
 
@@ -202,11 +248,9 @@ function renderBrands() {
     const container =
         document.querySelector(".brand-grid");
 
-
     if (!container) {
         return;
     }
-
 
     container.innerHTML = "";
 
@@ -244,7 +288,8 @@ function renderBrands() {
             document.createElement("article");
 
 
-        card.className = "brand-card";
+        card.className =
+            "brand-card";
 
 
         card.style.borderColor =
@@ -256,7 +301,6 @@ function renderBrands() {
             <div class="brand-icon">
                 📁
             </div>
-
 
             <div>
 
@@ -271,7 +315,6 @@ function renderBrands() {
 
             </div>
 
-
             <div class="brand-actions">
 
                 <button
@@ -280,7 +323,6 @@ function renderBrands() {
                 >
                     ✏️
                 </button>
-
 
                 <button
                     class="delete-brand"
@@ -313,7 +355,6 @@ function renderBrands() {
                 ".edit-brand"
             );
 
-
         editButton.addEventListener(
             "click",
             function(event) {
@@ -332,7 +373,6 @@ function renderBrands() {
             card.querySelector(
                 ".delete-brand"
             );
-
 
         deleteButton.addEventListener(
             "click",
@@ -362,7 +402,6 @@ function setupAddButton() {
     const button =
         document.querySelector(".add-button");
 
-
     if (!button) {
         return;
     }
@@ -376,7 +415,6 @@ function setupAddButton() {
                 prompt(
                     "Nombre de la marca:"
                 );
-
 
             if (!name) {
                 return;
@@ -402,6 +440,32 @@ function setupAddButton() {
 
 
 // --------------------------------------------
+// Botón volver
+// --------------------------------------------
+
+function setupBackButton() {
+
+    const button =
+        document.querySelector("#back-button");
+
+    if (!button) {
+        return;
+    }
+
+
+    button.addEventListener(
+        "click",
+        function() {
+
+            closeBrand();
+
+        }
+    );
+
+}
+
+
+// --------------------------------------------
 // Iniciar noteDRASI
 // --------------------------------------------
 
@@ -412,6 +476,8 @@ document.addEventListener(
         renderBrands();
 
         setupAddButton();
+
+        setupBackButton();
 
     }
 );
