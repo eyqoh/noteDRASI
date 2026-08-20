@@ -1,15 +1,20 @@
 // ============================================
 // noteDRASI
-// Carpetas + notas + editor
+// Sistema de carpetas y subcarpetas
+// PARTE 1/3
 // ============================================
 
 
 const STORAGE_KEY = "notedrasi_brands";
 
 
+// ============================================
+// ESTADO ACTUAL
+// ============================================
+
 let brands = loadBrands();
 
-let currentBrandId = null;
+let currentFolder = null;
 
 let currentNoteId = null;
 
@@ -39,31 +44,14 @@ function loadBrands() {
             JSON.parse(saved);
 
 
-        data.forEach(
-            brand => {
+        return normalizeFolders(data);
 
-                if (!Array.isArray(brand.notes)) {
+    }
 
-                    brand.notes = [];
-
-                }
-
-                if (!Array.isArray(brand.perfumes)) {
-
-                    brand.perfumes = [];
-
-                }
-
-            }
-        );
-
-
-        return data;
-
-    } catch (error) {
+    catch (error) {
 
         console.error(
-            "Error al cargar:",
+            "Error al cargar noteDRASI:",
             error
         );
 
@@ -71,6 +59,56 @@ function loadBrands() {
         return [];
 
     }
+
+}
+
+
+// ============================================
+// NORMALIZAR CARPETAS
+// ============================================
+
+function normalizeFolders(folders) {
+
+    if (!Array.isArray(folders)) {
+
+        return [];
+
+    }
+
+
+    folders.forEach(
+        folder => {
+
+            if (!Array.isArray(folder.folders)) {
+
+                folder.folders = [];
+
+            }
+
+
+            if (!Array.isArray(folder.notes)) {
+
+                folder.notes = [];
+
+            }
+
+
+            if (!Array.isArray(folder.perfumes)) {
+
+                folder.perfumes = [];
+
+            }
+
+
+            normalizeFolders(
+                folder.folders
+            );
+
+        }
+    );
+
+
+    return folders;
 
 }
 
@@ -90,40 +128,261 @@ function saveBrands() {
 
 
 // ============================================
-// CREAR CARPETA
+// BUSCAR CARPETA POR ID
 // ============================================
 
-function createBrand(name, color) {
+function findFolder(
+    folders,
+    id
+) {
 
-    const brand = {
+    for (
+        const folder of folders
+    ) {
 
-        id: Date.now(),
+        if (
+            folder.id === id
+        ) {
 
-        name: name,
+            return folder;
 
-        color: color || "#b8ff3d",
-
-        perfumes: [],
-
-        notes: []
-
-    };
+        }
 
 
-    brands.push(brand);
+        const found =
+            findFolder(
+                folder.folders,
+                id
+            );
 
-    saveBrands();
 
-    renderBrands();
+        if (found) {
+
+            return found;
+
+        }
+
+    }
+
+
+    return null;
 
 }
 
 
 // ============================================
-// MOSTRAR CARPETAS
+// CREAR CARPETA
 // ============================================
 
-function renderBrands() {
+function createFolder(
+    name,
+    color,
+    parentFolder = null
+) {
+
+    const newFolder = {
+
+        id: Date.now(),
+
+        name: name,
+
+        color:
+            color ||
+            "#b8ff3d",
+
+        folders: [],
+
+        notes: [],
+
+        perfumes: []
+
+    };
+
+
+    if (parentFolder) {
+
+        parentFolder.folders.push(
+            newFolder
+        );
+
+    }
+
+    else {
+
+        brands.push(
+            newFolder
+        );
+
+    }
+
+
+    saveBrands();
+
+}
+
+
+// ============================================
+// ELIMINAR CARPETA
+// ============================================
+
+function deleteFolder(
+    id
+) {
+
+    const confirmed =
+        confirm(
+            "¿Eliminar esta carpeta y todo su contenido?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    const deleted =
+        removeFolder(
+            brands,
+            id
+        );
+
+
+    if (deleted) {
+
+        saveBrands();
+
+        renderCurrentView();
+
+    }
+
+}
+
+
+// ============================================
+// ELIMINAR CARPETA RECURSIVAMENTE
+// ============================================
+
+function removeFolder(
+    folders,
+    id
+) {
+
+    const index =
+        folders.findIndex(
+            folder =>
+                folder.id === id
+        );
+
+
+    if (index !== -1) {
+
+        folders.splice(
+            index,
+            1
+        );
+
+        return true;
+
+    }
+
+
+    for (
+        const folder of folders
+    ) {
+
+        if (
+            removeFolder(
+                folder.folders,
+                id
+            )
+        ) {
+
+            return true;
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+// ============================================
+// EDITAR CARPETA
+// ============================================
+
+function editFolder(
+    id
+) {
+
+    const folder =
+        findFolder(
+            brands,
+            id
+        );
+
+
+    if (!folder) {
+
+        return;
+
+    }
+
+
+    const newName =
+        prompt(
+            "Nuevo nombre:",
+            folder.name
+        );
+
+
+    if (
+        newName &&
+        newName.trim()
+    ) {
+
+        folder.name =
+            newName.trim();
+
+    }
+
+
+    const newColor =
+        prompt(
+            "Nuevo color HEX:",
+            folder.color
+        );
+
+
+    if (
+        newColor &&
+        newColor.trim()
+    ) {
+
+        folder.color =
+            newColor.trim();
+
+    }
+
+
+    saveBrands();
+
+    renderCurrentView();
+
+}
+
+
+// ============================================
+// MOSTRAR CARPETAS DEL NIVEL ACTUAL
+// ============================================
+
+function renderFolders(
+    folders
+) {
 
     const container =
         document.querySelector(
@@ -141,9 +400,8 @@ function renderBrands() {
     container.innerHTML = "";
 
 
-    brands.forEach(
-        function(brand) {
-
+    folders.forEach(
+        folder => {
 
             const card =
                 document.createElement(
@@ -156,35 +414,51 @@ function renderBrands() {
 
 
             card.style.borderColor =
-                brand.color;
+                folder.color;
 
 
             card.innerHTML = `
 
-                <div class="brand-icon">
+                <div
+                    class="brand-icon"
+                >
                     📁
                 </div>
 
 
                 <div>
 
-                    <div class="brand-name">
-                        ${escapeHTML(brand.name)}
+                    <div
+                        class="brand-name"
+                    >
+                        ${escapeHTML(
+                            folder.name
+                        )}
                     </div>
 
 
-                    <div class="brand-count">
-                        ${brand.notes.length}
+                    <div
+                        class="brand-count"
+                    >
+                        ${
+                            folder.folders.length
+                        }
+                        carpetas ·
+                        ${
+                            folder.notes.length
+                        }
                         notas
                     </div>
 
                 </div>
 
 
-                <div class="brand-actions">
+                <div
+                    class="brand-actions"
+                >
 
                     <button
-                        class="edit-brand"
+                        class="edit-folder"
                         type="button"
                     >
                         ✏️
@@ -192,7 +466,7 @@ function renderBrands() {
 
 
                     <button
-                        class="delete-brand"
+                        class="delete-folder"
                         type="button"
                     >
                         🗑️
@@ -207,8 +481,8 @@ function renderBrands() {
                 "click",
                 function() {
 
-                    openBrand(
-                        brand.id
+                    openFolder(
+                        folder.id
                     );
 
                 }
@@ -217,7 +491,7 @@ function renderBrands() {
 
             const editButton =
                 card.querySelector(
-                    ".edit-brand"
+                    ".edit-folder"
                 );
 
 
@@ -227,8 +501,8 @@ function renderBrands() {
 
                     event.stopPropagation();
 
-                    editBrand(
-                        brand.id
+                    editFolder(
+                        folder.id
                     );
 
                 }
@@ -237,7 +511,7 @@ function renderBrands() {
 
             const deleteButton =
                 card.querySelector(
-                    ".delete-brand"
+                    ".delete-folder"
                 );
 
 
@@ -247,8 +521,8 @@ function renderBrands() {
 
                     event.stopPropagation();
 
-                    deleteBrand(
-                        brand.id
+                    deleteFolder(
+                        folder.id
                     );
 
                 }
@@ -269,22 +543,26 @@ function renderBrands() {
 // ABRIR CARPETA
 // ============================================
 
-function openBrand(id) {
+function openFolder(
+    id
+) {
 
-    const brand =
-        brands.find(
-            brand => brand.id === id
+    const folder =
+        findFolder(
+            brands,
+            id
         );
 
 
-    if (!brand) {
+    if (!folder) {
 
         return;
 
     }
 
 
-    currentBrandId = id;
+    currentFolder =
+        folder;
 
 
     document.querySelector(
@@ -314,13 +592,36 @@ function openBrand(id) {
     document.querySelector(
         "#brand-title"
     ).textContent =
-        brand.name;
+        folder.name;
 
 
     document.querySelector(
         "#brand-icon"
     ).style.color =
-        brand.color;
+        folder.color;
+
+
+    renderCurrentFolder();
+
+}
+
+
+// ============================================
+// MOSTRAR CONTENIDO DE CARPETA
+// ============================================
+
+function renderCurrentFolder() {
+
+    if (!currentFolder) {
+
+        return;
+
+    }
+
+
+    renderFolders(
+        currentFolder.folders
+    );
 
 
     renderNotes();
@@ -329,10 +630,96 @@ function openBrand(id) {
 
 
 // ============================================
-// VOLVER AL INICIO
+// VOLVER
 // ============================================
 
-function closeBrand() {
+function goBack() {
+
+    if (!currentFolder) {
+
+        return;
+
+    }
+
+
+    const parent =
+        findParentFolder(
+            brands,
+            currentFolder.id
+        );
+
+
+    if (parent) {
+
+        currentFolder =
+            parent;
+
+        renderCurrentFolder();
+
+        updateFolderHeader();
+
+        return;
+
+    }
+
+
+    closeFolder();
+
+}
+
+
+// ============================================
+// ENCONTRAR PADRE
+// ============================================
+
+function findParentFolder(
+    folders,
+    childId
+) {
+
+    for (
+        const folder of folders
+    ) {
+
+        if (
+            folder.folders.some(
+                child =>
+                    child.id === childId
+            )
+        ) {
+
+            return folder;
+
+        }
+
+
+        const parent =
+            findParentFolder(
+                folder.folders,
+                childId
+            );
+
+
+        if (parent) {
+
+            return parent;
+
+        }
+
+    }
+
+
+    return null;
+
+}
+// ============================================
+// CERRAR CARPETA
+// ============================================
+
+function closeFolder() {
+
+    currentFolder = null;
+
 
     document.querySelector(
         "#brand-view"
@@ -358,110 +745,275 @@ function closeBrand() {
         "block";
 
 
-    currentBrandId = null;
-
-}
-
-
-// ============================================
-// EDITAR CARPETA
-// ============================================
-
-function editBrand(id) {
-
-    const brand =
-        brands.find(
-            brand => brand.id === id
-        );
-
-
-    if (!brand) {
-
-        return;
-
-    }
-
-
-    const newName =
-        prompt(
-            "Nuevo nombre:",
-            brand.name
-        );
-
-
-    if (newName) {
-
-        brand.name =
-            newName;
-
-    }
-
-
-    const newColor =
-        prompt(
-            "Nuevo color HEX:",
-            brand.color
-        );
-
-
-    if (newColor) {
-
-        brand.color =
-            newColor;
-
-    }
-
-
-    saveBrands();
-
     renderBrands();
 
 }
 
 
 // ============================================
-// ELIMINAR CARPETA
+// ACTUALIZAR ENCABEZADO
 // ============================================
 
-function deleteBrand(id) {
+function updateFolderHeader() {
 
-    const brand =
-        brands.find(
-            brand => brand.id === id
-        );
-
-
-    if (!brand) {
+    if (!currentFolder) {
 
         return;
 
     }
 
 
-    const confirmed =
-        confirm(
-            "¿Eliminar la carpeta " +
-            brand.name +
-            "?"
+    const title =
+        document.querySelector(
+            "#brand-title"
         );
 
 
-    if (!confirmed) {
+    if (title) {
+
+        title.textContent =
+            currentFolder.name;
+
+    }
+
+
+    const icon =
+        document.querySelector(
+            "#brand-icon"
+        );
+
+
+    if (icon) {
+
+        icon.style.color =
+            currentFolder.color;
+
+    }
+
+}
+
+
+// ============================================
+// RENDERIZAR VISTA ACTUAL
+// ============================================
+
+function renderCurrentView() {
+
+    if (currentFolder) {
+
+        renderCurrentFolder();
+
+        updateFolderHeader();
+
+    }
+
+    else {
+
+        renderBrands();
+
+    }
+
+}
+
+
+// ============================================
+// CREAR CARPETA EN EL NIVEL ACTUAL
+// ============================================
+
+function createFolderFromCurrentView() {
+
+    const name =
+        prompt(
+            "Nombre de la carpeta:"
+        );
+
+
+    if (
+        !name ||
+        !name.trim()
+    ) {
 
         return;
 
     }
 
 
-    brands =
-        brands.filter(
-            brand => brand.id !== id
+    const color =
+        prompt(
+            "Color HEX de la carpeta:",
+            "#b8ff3d"
         );
 
 
-    saveBrands();
+    createFolder(
+        name.trim(),
+        color,
+        currentFolder
+    );
 
-    renderBrands();
+
+    renderCurrentView();
+
+}
+
+
+// ============================================
+// MOSTRAR CARPETAS PRINCIPALES
+// ============================================
+
+function renderBrands() {
+
+    const container =
+        document.querySelector(
+            ".brand-grid"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    container.innerHTML = "";
+
+
+    brands.forEach(
+        folder => {
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "brand-card";
+
+
+            card.style.borderColor =
+                folder.color;
+
+
+            card.innerHTML = `
+
+                <div
+                    class="brand-icon"
+                >
+                    📁
+                </div>
+
+
+                <div>
+
+                    <div
+                        class="brand-name"
+                    >
+                        ${escapeHTML(
+                            folder.name
+                        )}
+                    </div>
+
+
+                    <div
+                        class="brand-count"
+                    >
+                        ${
+                            folder.folders.length
+                        }
+                        carpetas ·
+                        ${
+                            folder.notes.length
+                        }
+                        notas
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="brand-actions"
+                >
+
+                    <button
+                        class="edit-folder"
+                        type="button"
+                    >
+                        ✏️
+                    </button>
+
+
+                    <button
+                        class="delete-folder"
+                        type="button"
+                    >
+                        🗑️
+                    </button>
+
+                </div>
+
+            `;
+
+
+            card.addEventListener(
+                "click",
+                function() {
+
+                    openFolder(
+                        folder.id
+                    );
+
+                }
+            );
+
+
+            const editButton =
+                card.querySelector(
+                    ".edit-folder"
+                );
+
+
+            editButton.addEventListener(
+                "click",
+                function(event) {
+
+                    event.stopPropagation();
+
+                    editFolder(
+                        folder.id
+                    );
+
+                }
+            );
+
+
+            const deleteButton =
+                card.querySelector(
+                    ".delete-folder"
+                );
+
+
+            deleteButton.addEventListener(
+                "click",
+                function(event) {
+
+                    event.stopPropagation();
+
+                    deleteFolder(
+                        folder.id
+                    );
+
+                }
+            );
+
+
+            container.appendChild(
+                card
+            );
+
+        }
+    );
 
 }
 
@@ -472,13 +1024,7 @@ function deleteBrand(id) {
 
 function renderNotes() {
 
-    const brand =
-        brands.find(
-            brand => brand.id === currentBrandId
-        );
-
-
-    if (!brand) {
+    if (!currentFolder) {
 
         return;
 
@@ -491,53 +1037,18 @@ function renderNotes() {
         );
 
 
-    const count =
-        document.querySelector(
-            "#brand-perfume-count"
-        );
-
-
-    container.innerHTML = "";
-
-
-    count.textContent =
-        brand.notes.length +
-        " notas";
-
-
-    if (
-        brand.notes.length === 0
-    ) {
-
-        container.innerHTML = `
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    📝
-                </div>
-
-                <div class="empty-title">
-                    Todavía no hay notas
-                </div>
-
-                <div class="empty-text">
-                    Tocá + para crear tu primera nota.
-                </div>
-
-            </div>
-
-        `;
-
+    if (!container) {
 
         return;
 
     }
 
 
-    brand.notes.forEach(
-        function(note) {
+    container.innerHTML = "";
 
+
+    currentFolder.notes.forEach(
+        note => {
 
             const card =
                 document.createElement(
@@ -551,19 +1062,27 @@ function renderNotes() {
 
             card.innerHTML = `
 
-                <div class="brand-icon">
+                <div
+                    class="brand-icon"
+                >
                     📝
                 </div>
 
 
                 <div>
 
-                    <div class="brand-name">
-                        ${escapeHTML(note.title)}
+                    <div
+                        class="brand-name"
+                    >
+                        ${escapeHTML(
+                            note.title
+                        )}
                     </div>
 
 
-                    <div class="brand-count">
+                    <div
+                        class="brand-count"
+                    >
                         ${
                             note.content
                                 ? escapeHTML(
@@ -579,7 +1098,9 @@ function renderNotes() {
                 </div>
 
 
-                <div class="brand-actions">
+                <div
+                    class="brand-actions"
+                >
 
                     <button
                         class="delete-note"
@@ -639,15 +1160,11 @@ function renderNotes() {
 // ABRIR NOTA
 // ============================================
 
-function openNote(id) {
+function openNote(
+    id
+) {
 
-    const brand =
-        brands.find(
-            brand => brand.id === currentBrandId
-        );
-
-
-    if (!brand) {
+    if (!currentFolder) {
 
         return;
 
@@ -655,8 +1172,9 @@ function openNote(id) {
 
 
     const note =
-        brand.notes.find(
-            note => note.id === id
+        currentFolder.notes.find(
+            note =>
+                note.id === id
         );
 
 
@@ -667,7 +1185,8 @@ function openNote(id) {
     }
 
 
-    currentNoteId = id;
+    currentNoteId =
+        id;
 
 
     document.querySelector(
@@ -688,23 +1207,39 @@ function openNote(id) {
         "block";
 
 
-    document.querySelector(
-        "#note-detail-title"
-    ).textContent =
-        note.title;
+    const title =
+        document.querySelector(
+            "#note-detail-title"
+        );
 
 
-    document.querySelector(
-        "#note-detail-content"
-    ).textContent =
-        note.content ||
-        "Esta nota está vacía.";
+    const content =
+        document.querySelector(
+            "#note-detail-content"
+        );
+
+
+    if (title) {
+
+        title.textContent =
+            note.title;
+
+    }
+
+
+    if (content) {
+
+        content.textContent =
+            note.content ||
+            "Esta nota está vacía.";
+
+    }
 
 }
 
 
 // ============================================
-// VOLVER DE NOTA
+// VOLVER DE UNA NOTA
 // ============================================
 
 function closeNote() {
@@ -721,18 +1256,30 @@ function closeNote() {
         "block";
 
 
-    currentNoteId = null;
+    currentNoteId =
+        null;
+
+
+    renderCurrentFolder();
 
 }
 
 
 // ============================================
-// ABRIR EDITOR PARA CREAR
+// CREAR NOTA
 // ============================================
 
 function openNewNoteEditor() {
 
-    editingNoteId = null;
+    if (!currentFolder) {
+
+        return;
+
+    }
+
+
+    editingNoteId =
+        null;
 
 
     document.querySelector(
@@ -773,18 +1320,12 @@ function openNewNoteEditor() {
 
 
 // ============================================
-// ABRIR EDITOR PARA EDITAR
+// EDITAR NOTA
 // ============================================
 
 function openEditNoteEditor() {
 
-    const brand =
-        brands.find(
-            brand => brand.id === currentBrandId
-        );
-
-
-    if (!brand) {
+    if (!currentFolder) {
 
         return;
 
@@ -792,8 +1333,9 @@ function openEditNoteEditor() {
 
 
     const note =
-        brand.notes.find(
-            note => note.id === currentNoteId
+        currentFolder.notes.find(
+            note =>
+                note.id === currentNoteId
         );
 
 
@@ -851,13 +1393,7 @@ function openEditNoteEditor() {
 
 function saveNoteFromEditor() {
 
-    const brand =
-        brands.find(
-            brand => brand.id === currentBrandId
-        );
-
-
-    if (!brand) {
+    if (!currentFolder) {
 
         return;
 
@@ -893,24 +1429,26 @@ function saveNoteFromEditor() {
 
         titleInput.focus();
 
-
         return;
 
     }
 
 
-    if (editingNoteId !== null) {
+    if (
+        editingNoteId !== null
+    ) {
 
         const note =
-            brand.notes.find(
+            currentFolder.notes.find(
                 note =>
-                    note.id === editingNoteId
+                    note.id ===
+                    editingNoteId
             );
 
 
         if (note) {
 
-            note.title =
+           note.title =
                 title;
 
             note.content =
@@ -919,7 +1457,6 @@ function saveNoteFromEditor() {
         }
 
     }
-
 
     else {
 
@@ -934,7 +1471,7 @@ function saveNoteFromEditor() {
         };
 
 
-        brand.notes.push(
+        currentFolder.notes.push(
             newNote
         );
 
@@ -965,7 +1502,7 @@ function saveNoteFromEditor() {
     );
 
 
-    renderNotes();
+    renderCurrentFolder();
 
 }
 
@@ -994,7 +1531,11 @@ function cancelNoteEditor() {
         "block";
 
 
-    editingNoteId = null;
+    editingNoteId =
+        null;
+
+
+    renderCurrentFolder();
 
 }
 
@@ -1003,15 +1544,11 @@ function cancelNoteEditor() {
 // ELIMINAR NOTA
 // ============================================
 
-function deleteNote(id) {
+function deleteNote(
+    id
+) {
 
-    const brand =
-        brands.find(
-            brand => brand.id === currentBrandId
-        );
-
-
-    if (!brand) {
+    if (!currentFolder) {
 
         return;
 
@@ -1031,15 +1568,17 @@ function deleteNote(id) {
     }
 
 
-    brand.notes =
-        brand.notes.filter(
-            note => note.id !== id
+    currentFolder.notes =
+        currentFolder.notes.filter(
+            note =>
+                note.id !== id
         );
 
 
     saveBrands();
 
-    renderNotes();
+
+    renderCurrentFolder();
 
 
     document.querySelector(
@@ -1054,7 +1593,8 @@ function deleteNote(id) {
         "block";
 
 
-    currentNoteId = null;
+    currentNoteId =
+        null;
 
 }
 
@@ -1063,7 +1603,9 @@ function deleteNote(id) {
 // ESCAPAR HTML
 // ============================================
 
-function escapeHTML(text) {
+function escapeHTML(
+    text
+) {
 
     const div =
         document.createElement(
@@ -1079,134 +1621,51 @@ function escapeHTML(text) {
 
 }
 
-
 // ============================================
-// BOTÓN AGREGAR CARPETA
+// BOTONES
 // ============================================
 
-function setupAddButton() {
+function setupButtons() {
 
-    const buttons =
+    const addButtons =
         document.querySelectorAll(
             ".add-button"
         );
 
 
-    const button =
-        buttons[buttons.length - 1];
+    if (addButtons.length > 0) {
+
+        const addButton =
+            addButtons[
+                addButtons.length - 1
+            ];
 
 
-    if (!button) {
+        addButton.addEventListener(
+            "click",
+            function() {
 
-        return;
-
-    }
-
-
-    button.addEventListener(
-        "click",
-        function() {
-
-            const name =
-                prompt(
-                    "Nombre de la carpeta:"
-                );
-
-
-            if (!name) {
-
-                return;
+                createFolderFromCurrentView();
 
             }
-
-
-            const color =
-                prompt(
-                    "Color HEX de la carpeta:",
-                    "#b8ff3d"
-                );
-
-
-            createBrand(
-                name,
-                color ||
-                "#b8ff3d"
-            );
-
-        }
-    );
-
-}
-
-
-// ============================================
-// BOTÓN AGREGAR NOTA
-// ============================================
-
-function setupAddNoteButton() {
-
-    const button =
-        document.querySelector(
-            "#add-note-button"
         );
-
-
-    if (!button) {
-
-        return;
 
     }
 
 
-    button.addEventListener(
-        "click",
-        function() {
-
-            openNewNoteEditor();
-
-        }
-    );
-
-}
-
-
-// ============================================
-// BOTONES VOLVER
-// ============================================
-
-function setupBackButtons() {
-
-    const brandBack =
+    const backButton =
         document.querySelector(
             "#back-button"
         );
 
 
-    const noteBack =
-        document.querySelector(
-            "#note-back-button"
-        );
+    if (backButton) {
 
-
-    const cancelButton =
-        document.querySelector(
-            "#cancel-note-button"
-        );
-
-
-    const cancelEditor =
-        document.querySelector(
-            "#cancel-editor-button"
-        );
-
-
-    if (brandBack) {
-
-        brandBack.addEventListener(
+        backButton.addEventListener(
             "click",
             function() {
 
-                closeBrand();
+                goBack();
 
             }
         );
@@ -1214,41 +1673,19 @@ function setupBackButtons() {
     }
 
 
-    if (noteBack) {
-
-        noteBack.addEventListener(
-            "click",
-            function() {
-
-                closeNote();
-
-            }
+    const addNoteButton =
+        document.querySelector(
+            "#add-note-button"
         );
 
-    }
 
+    if (addNoteButton) {
 
-    if (cancelButton) {
-
-        cancelButton.addEventListener(
+        addNoteButton.addEventListener(
             "click",
             function() {
 
-                cancelNoteEditor();
-
-            }
-        );
-
-    }
-
-
-    if (cancelEditor) {
-
-        cancelEditor.addEventListener(
-            "click",
-            function() {
-
-                cancelNoteEditor();
+                openNewNoteEditor();
 
             }
         );
@@ -1259,10 +1696,10 @@ function setupBackButtons() {
 
 
 // ============================================
-// ACCIONES DE NOTA
+// BOTONES DE NOTAS
 // ============================================
 
-function setupNoteActions() {
+function setupNoteButtons() {
 
     const editButton =
         document.querySelector(
@@ -1286,11 +1723,7 @@ function setupNoteActions() {
 
         editButton.addEventListener(
             "click",
-            function() {
-
-                openEditNoteEditor();
-
-            }
+            openEditNoteEditor
         );
 
     }
@@ -1320,11 +1753,7 @@ function setupNoteActions() {
 
         saveButton.addEventListener(
             "click",
-            function() {
-
-                saveNoteFromEditor();
-
-            }
+            saveNoteFromEditor
         );
 
     }
@@ -1333,7 +1762,7 @@ function setupNoteActions() {
 
 
 // ============================================
-// INICIAR
+// INICIAR APP
 // ============================================
 
 document.addEventListener(
@@ -1342,15 +1771,9 @@ document.addEventListener(
 
         renderBrands();
 
-        setupAddButton();
+        setupButtons();
 
-        setupAddNoteButton();
-
-        setupBackButtons();
-
-        setupNoteActions();
+        setupNoteButtons();
 
     }
 );
-
-   
