@@ -162,3 +162,8 @@ body {
     }
 
 }
+/* Elementos ocultos */
+
+.hidden {
+    display: none !important;
+}
