@@ -1,13 +1,13 @@
 // ============================================
 // noteDRASI
-// Sistema inicial de marcas
+// Sistema de marcas
 // ============================================
 
 const STORAGE_KEY = "notedrasi_brands";
 
 
 // --------------------------------------------
-// Cargar marcas guardadas
+// Cargar marcas
 // --------------------------------------------
 
 function loadBrands() {
@@ -21,7 +21,7 @@ function loadBrands() {
     try {
         return JSON.parse(saved);
     } catch (error) {
-        console.error("No se pudieron cargar las marcas:", error);
+        console.error("Error al cargar las marcas:", error);
         return [];
     }
 }
@@ -31,7 +31,7 @@ function loadBrands() {
 // Guardar marcas
 // --------------------------------------------
 
-function saveBrands(brands) {
+function saveBrands() {
 
     localStorage.setItem(
         STORAGE_KEY,
@@ -42,17 +42,17 @@ function saveBrands(brands) {
 
 
 // --------------------------------------------
-// Obtener las marcas actuales
+// Datos actuales
 // --------------------------------------------
 
 let brands = loadBrands();
 
 
 // --------------------------------------------
-// Crear una nueva marca
+// Crear marca
 // --------------------------------------------
 
-function createBrand(name, color = "#b8ff3d") {
+function createBrand(name, color) {
 
     const brand = {
 
@@ -60,7 +60,7 @@ function createBrand(name, color = "#b8ff3d") {
 
         name: name,
 
-        color: color,
+        color: color || "#b8ff3d",
 
         perfumes: []
 
@@ -69,7 +69,7 @@ function createBrand(name, color = "#b8ff3d") {
 
     brands.push(brand);
 
-    saveBrands(brands);
+    saveBrands();
 
     renderBrands();
 
@@ -77,24 +77,32 @@ function createBrand(name, color = "#b8ff3d") {
 
 
 // --------------------------------------------
-// Eliminar una marca
+// Abrir marca
 // --------------------------------------------
 
-function deleteBrand(id) {
+function openBrand(id) {
 
-    brands = brands.filter(
-        brand => brand.id !== id
+    const brand = brands.find(
+        brand => brand.id === id
     );
 
-    saveBrands(brands);
 
-    renderBrands();
+    if (!brand) {
+        return;
+    }
+
+
+    alert(
+        "Abriste la carpeta: " +
+        brand.name +
+        "\n\nPróximamente acá estarán tus perfumes."
+    );
 
 }
 
 
 // --------------------------------------------
-// Mostrar las marcas
+// Mostrar marcas
 // --------------------------------------------
 
 function renderBrands() {
@@ -114,7 +122,7 @@ function renderBrands() {
     if (brands.length === 0) {
 
         container.innerHTML = `
-        
+
             <div class="empty-state">
 
                 <div class="empty-icon">
@@ -138,7 +146,7 @@ function renderBrands() {
     }
 
 
-    brands.forEach(brand => {
+    brands.forEach(function(brand) {
 
         const card =
             document.createElement("article");
@@ -149,16 +157,13 @@ function renderBrands() {
 
         card.style.borderColor =
             brand.color;
-card.addEventListener("click", () => {
-    openBrand(brand.id);
-});
+
 
         card.innerHTML = `
 
             <div class="brand-icon">
                 📁
             </div>
-
 
             <div>
 
@@ -176,34 +181,27 @@ card.addEventListener("click", () => {
         `;
 
 
+        // Hacer que la carpeta sea tocable
+
+        card.addEventListener(
+            "click",
+            function() {
+
+                openBrand(brand.id);
+
+            }
+        );
+
+
         container.appendChild(card);
 
     });
 
 }
 
+
 // --------------------------------------------
-// Abrir una marca
-// --------------------------------------------
-
-function openBrand(id) {
-
-    const brand = brands.find(
-        brand => brand.id === id
-    );
-
-    if (!brand) {
-        return;
-    }
-
-    alert(
-        "Abriste la carpeta: " +
-        brand.name +
-        "\n\nPróximamente acá estarán tus perfumes."
-    );
-}
-// --------------------------------------------
-// Botón para agregar marca
+// Botón agregar marca
 // --------------------------------------------
 
 function setupAddButton() {
@@ -219,12 +217,14 @@ function setupAddButton() {
 
     button.addEventListener(
         "click",
-        () => {
+        function() {
 
             const name =
-                prompt("Nombre de la marca:");
+                prompt(
+                    "Nombre de la marca:"
+                );
 
-            
+
             if (!name) {
                 return;
             }
@@ -249,12 +249,12 @@ function setupAddButton() {
 
 
 // --------------------------------------------
-// Inicializar noteDRASI
+// Iniciar noteDRASI
 // --------------------------------------------
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function() {
 
         renderBrands();
 
