@@ -149,7 +149,9 @@ function renderBrands() {
 
         card.style.borderColor =
             brand.color;
-
+card.addEventListener("click", () => {
+    openBrand(brand.id);
+});
 
         card.innerHTML = `
 
@@ -180,7 +182,26 @@ function renderBrands() {
 
 }
 
+// --------------------------------------------
+// Abrir una marca
+// --------------------------------------------
 
+function openBrand(id) {
+
+    const brand = brands.find(
+        brand => brand.id === id
+    );
+
+    if (!brand) {
+        return;
+    }
+
+    alert(
+        "Abriste la carpeta: " +
+        brand.name +
+        "\n\nPróximamente acá estarán tus perfumes."
+    );
+}
 // --------------------------------------------
 // Botón para agregar marca
 // --------------------------------------------
