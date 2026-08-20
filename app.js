@@ -102,6 +102,98 @@ function openBrand(id) {
 
 
 // --------------------------------------------
+// Eliminar marca
+// --------------------------------------------
+
+function deleteBrand(id) {
+
+    const brand = brands.find(
+        brand => brand.id === id
+    );
+
+
+    if (!brand) {
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+            "¿Eliminar la carpeta " +
+            brand.name +
+            "?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    brands = brands.filter(
+        brand => brand.id !== id
+    );
+
+
+    saveBrands();
+
+    renderBrands();
+
+}
+
+
+// --------------------------------------------
+// Editar marca
+// --------------------------------------------
+
+function editBrand(id) {
+
+    const brand = brands.find(
+        brand => brand.id === id
+    );
+
+
+    if (!brand) {
+        return;
+    }
+
+
+    const newName =
+        prompt(
+            "Nuevo nombre:",
+            brand.name
+        );
+
+
+    if (newName) {
+
+        brand.name = newName;
+
+    }
+
+
+    const newColor =
+        prompt(
+            "Nuevo color HEX:",
+            brand.color
+        );
+
+
+    if (newColor) {
+
+        brand.color = newColor;
+
+    }
+
+
+    saveBrands();
+
+    renderBrands();
+
+}
+
+
+// --------------------------------------------
 // Mostrar marcas
 // --------------------------------------------
 
@@ -165,6 +257,7 @@ function renderBrands() {
                 📁
             </div>
 
+
             <div>
 
                 <div class="brand-name">
@@ -178,16 +271,76 @@ function renderBrands() {
 
             </div>
 
+
+            <div class="brand-actions">
+
+                <button
+                    class="edit-brand"
+                    type="button"
+                >
+                    ✏️
+                </button>
+
+
+                <button
+                    class="delete-brand"
+                    type="button"
+                >
+                    🗑️
+                </button>
+
+            </div>
+
         `;
 
 
-        // Hacer que la carpeta sea tocable
+        // Abrir carpeta
 
         card.addEventListener(
             "click",
             function() {
 
                 openBrand(brand.id);
+
+            }
+        );
+
+
+        // Editar
+
+        const editButton =
+            card.querySelector(
+                ".edit-brand"
+            );
+
+
+        editButton.addEventListener(
+            "click",
+            function(event) {
+
+                event.stopPropagation();
+
+                editBrand(brand.id);
+
+            }
+        );
+
+
+        // Eliminar
+
+        const deleteButton =
+            card.querySelector(
+                ".delete-brand"
+            );
+
+
+        deleteButton.addEventListener(
+            "click",
+            function(event) {
+
+                event.stopPropagation();
+
+                deleteBrand(brand.id);
 
             }
         );
