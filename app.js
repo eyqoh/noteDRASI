@@ -604,9 +604,85 @@ function createFolderCard(
     );
 
 
+    const editButton =
+        card.querySelector(
+            ".edit-folder"
+        );
+
+
+    editButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            const newName =
+                prompt(
+                    "Nuevo nombre:",
+                    folder.name
+                );
+
+
+            if (
+                !newName ||
+                !newName.trim()
+            ) {
+
+                return;
+
+            }
+
+
+            folder.name =
+                newName.trim();
+
+
+            saveData();
+
+            render();
+
+        }
+    );
+
+
+    const deleteButton =
+        card.querySelector(
+            ".delete-folder"
+        );
+
+
+    deleteButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+            const confirmed =
+                confirm(
+                    "¿Eliminar esta carpeta?"
+                );
+
+
+            if (!confirmed) {
+
+                return;
+
+            }
+
+
+            removeFolder(
+                folder.id
+            );
+
+        }
+    );
+
+
     return card;
 
 }
+
+
 
 // ============================================
 // TARJETA DE NOTA
