@@ -550,7 +550,7 @@ function createFolderCard(
             📁
         </div>
 
-        <div>
+        <div class="brand-info">
 
             <div class="brand-name">
                 ${escapeHTML(
@@ -592,21 +592,15 @@ function createFolderCard(
     `;
 
 
-    card.addEventListener(
-        "click",
-        () => {
-
-            openFolder(
-                folder.id
-            );
-
-        }
-    );
-
-
     const editButton =
         card.querySelector(
             ".edit-folder"
+        );
+
+
+    const deleteButton =
+        card.querySelector(
+            ".delete-folder"
         );
 
 
@@ -614,7 +608,10 @@ function createFolderCard(
         "click",
         event => {
 
+            event.preventDefault();
+
             event.stopPropagation();
+
 
             const newName =
                 prompt(
@@ -645,17 +642,14 @@ function createFolderCard(
     );
 
 
-    const deleteButton =
-        card.querySelector(
-            ".delete-folder"
-        );
-
-
     deleteButton.addEventListener(
         "click",
         event => {
 
+            event.preventDefault();
+
             event.stopPropagation();
+
 
             const confirmed =
                 confirm(
@@ -670,7 +664,30 @@ function createFolderCard(
             }
 
 
-            removeFolder(
+            deleteFolder(
+                folder.id
+            );
+
+        }
+    );
+
+
+    card.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.closest(
+                    ".brand-actions"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            openFolder(
                 folder.id
             );
 
