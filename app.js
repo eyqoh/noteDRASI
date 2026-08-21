@@ -461,12 +461,10 @@ function renderFolder() {
 
     showView("brand-view");
 
-
     const title =
         document.querySelector(
             "#brand-title"
         );
-
 
     if (title) {
 
@@ -475,54 +473,40 @@ function renderFolder() {
 
     }
 
-
-    const grid =
+    const folderGrid =
         document.querySelector(
-            ".brand-grid"
+            "#folder-grid"
         );
-
 
     const noteGrid =
         document.querySelector(
             "#note-grid"
         );
 
+    if (folderGrid) {
 
-    if (grid) {
+        folderGrid.innerHTML = "";
 
-        grid.innerHTML = "";
+        currentFolder.folders.forEach(
+            folder => {
 
-    }
-
-
-    if (noteGrid) {
-
-        noteGrid.innerHTML = "";
-
-    }
-
-
-    currentFolder.folders.forEach(
-        folder => {
-
-            if (grid) {
-
-                grid.appendChild(
+                folderGrid.appendChild(
                     createFolderCard(
                         folder
                     )
                 );
 
             }
+        );
 
-        }
-    );
+    }
 
+    if (noteGrid) {
 
-    currentFolder.notes.forEach(
-        note => {
+        noteGrid.innerHTML = "";
 
-            if (noteGrid) {
+        currentFolder.notes.forEach(
+            note => {
 
                 noteGrid.appendChild(
                     createNoteCard(
@@ -531,9 +515,9 @@ function renderFolder() {
                 );
 
             }
+        );
 
-        }
-    );
+    }
 
 }
 
