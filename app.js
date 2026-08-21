@@ -298,6 +298,82 @@ function goBack() {
 
 }
 
+// ============================================
+// ELIMINAR CARPETA
+// ============================================
+
+function deleteFolder(id) {
+
+    const folder =
+        findFolder(
+            data.folders,
+            id
+        );
+
+
+    if (!folder) {
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "¿Eliminar esta carpeta y todo su contenido?"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    const parent =
+        findParent(
+            data.folders,
+            id
+        );
+
+
+    if (parent) {
+
+        parent.folders =
+            parent.folders.filter(
+                child =>
+                    child.id !== id
+            );
+
+    } else {
+
+        data.folders =
+            data.folders.filter(
+                folder =>
+                    folder.id !== id
+            );
+
+    }
+
+
+    if (
+        currentFolder &&
+        currentFolder.id === id
+    ) {
+
+        currentFolder =
+            parent || null;
+
+    }
+
+
+    saveData();
+
+    render();
+
+}
+
 
 // ============================================
 // CREAR NOTA
