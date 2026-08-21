@@ -1,62 +1,48 @@
 // ============================================
 // noteDRASI
-// Sistema de carpetas y subcarpetas
-// PARTE 1/3
+// Sistema de carpetas + notas
 // ============================================
 
+const STORAGE_KEY = "notedrasi_data";
 
-const STORAGE_KEY = "notedrasi_brands";
-
-
-// ============================================
-// ESTADO ACTUAL
-// ============================================
-
-let brands = loadBrands();
+let data = loadData();
 
 let currentFolder = null;
 
-let currentNoteId = null;
-
-let editingNoteId = null;
+let currentNote = null;
 
 
 // ============================================
-// CARGAR DATOS
+// DATOS
 // ============================================
 
-function loadBrands() {
+function loadData() {
 
     const saved =
         localStorage.getItem(STORAGE_KEY);
 
-
     if (!saved) {
 
-        return [];
+        return {
+            folders: [],
+            notes: []
+        };
 
     }
-
 
     try {
 
-        const data =
+        const parsed =
             JSON.parse(saved);
 
+        return normalizeFolder(parsed);
 
-        return normalizeFolders(data);
+    } catch {
 
-    }
-
-    catch (error) {
-
-        console.error(
-            "Error al cargar noteDRASI:",
-            error
-        );
-
-
-        return [];
+        return {
+            folders: [],
+            notes: []
+        };
 
     }
 
@@ -64,71 +50,96 @@ function loadBrands() {
 
 
 // ============================================
-// NORMALIZAR CARPETAS
+// NORMALIZAR
 // ============================================
 
-function normalizeFolders(folders) {
+function normalizeFolder(folder) {
 
-    if (!Array.isArray(folders)) {
+    if (!folder.folders) {
 
-        return [];
+        folder.folders = [];
 
     }
 
+    if (!folder.notes) {
 
-    folders.forEach(
-        folder => {
+        folder.notes = [];
 
-            if (!Array.isArray(folder.folders)) {
+    }
 
-                folder.folders = [];
-
-            }
-
-
-            if (!Array.isArray(folder.notes)) {
-
-                folder.notes = [];
-
-            }
-
-
-            if (!Array.isArray(folder.perfumes)) {
-
-                folder.perfumes = [];
-
-            }
-
-
-            normalizeFolders(
-                folder.folders
-            );
-
-        }
+    folder.folders.forEach(
+        child => normalizeFolder(child)
     );
 
-
-    return folders;
+    return folder;
 
 }
 
 
 // ============================================
-// GUARDAR DATOS
+// GUARDAR
 // ============================================
 
-function saveBrands() {
+function saveData() {
 
     localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(brands)
+        JSON.stringify(data)
     );
 
 }
 
 
 // ============================================
-// BUSCAR CARPETA POR ID
+// CREAR CARPETA
+// ============================================
+
+function createFolder(
+    name,
+    color
+) {
+
+    const folder = {
+
+        id: Date.now(),
+
+        name: name,
+
+        color:
+            color ||
+            "#b8ff3d",
+
+        folders: [],
+
+        notes: []
+
+    };
+
+
+    if (currentFolder) {
+
+        currentFolder.folders.push(
+            folder
+        );
+
+    } else {
+
+        data.folders.push(
+            folder
+        );
+
+    }
+
+
+    saveData();
+
+    render();
+
+}
+
+
+// ============================================
+// BUSCAR CARPETA
 // ============================================
 
 function findFolder(
@@ -164,515 +175,15 @@ function findFolder(
 
     }
 
-
     return null;
 
 }
-
-
-// ============================================
-// CREAR CARPETA
-// ============================================
-
-function createFolder(
-    name,
-    color,
-    parentFolder = null
-) {
-
-    const newFolder = {
-
-        id: Date.now(),
-
-        name: name,
-
-        color:
-            color ||
-            "#b8ff3d",
-
-        folders: [],
-
-        notes: [],
-
-        perfumes: []
-
-    };
-
-
-    if (parentFolder) {
-
-        parentFolder.folders.push(
-            newFolder
-        );
-
-    }
-
-    else {
-
-        brands.push(
-            newFolder
-        );
-
-    }
-
-
-    saveBrands();
-
-}
-
-
-// ============================================
-// ELIMINAR CARPETA
-// ============================================
-
-function deleteFolder(
-    id
-) {
-
-    const confirmed =
-        confirm(
-            "¿Eliminar esta carpeta y todo su contenido?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    const deleted =
-        removeFolder(
-            brands,
-            id
-        );
-
-
-    if (deleted) {
-
-        saveBrands();
-
-        renderCurrentView();
-
-    }
-
-}
-
-
-// ============================================
-// ELIMINAR CARPETA RECURSIVAMENTE
-// ============================================
-
-function removeFolder(
-    folders,
-    id
-) {
-
-    const index =
-        folders.findIndex(
-            folder =>
-                folder.id === id
-        );
-
-
-    if (index !== -1) {
-
-        folders.splice(
-            index,
-            1
-        );
-
-        return true;
-
-    }
-
-
-    for (
-        const folder of folders
-    ) {
-
-        if (
-            removeFolder(
-                folder.folders,
-                id
-            )
-        ) {
-
-            return true;
-
-        }
-
-    }
-
-
-    return false;
-
-}
-
-
-// ============================================
-// EDITAR CARPETA
-// ============================================
-
-function editFolder(
-    id
-) {
-
-    const folder =
-        findFolder(
-            brands,
-            id
-        );
-
-
-    if (!folder) {
-
-        return;
-
-    }
-
-
-    const newName =
-        prompt(
-            "Nuevo nombre:",
-            folder.name
-        );
-
-
-    if (
-        newName &&
-        newName.trim()
-    ) {
-
-        folder.name =
-            newName.trim();
-
-    }
-
-
-    const newColor =
-        prompt(
-            "Nuevo color HEX:",
-            folder.color
-        );
-
-
-    if (
-        newColor &&
-        newColor.trim()
-    ) {
-
-        folder.color =
-            newColor.trim();
-
-    }
-
-
-    saveBrands();
-
-    renderCurrentView();
-
-}
-
-
-// ============================================
-// MOSTRAR CARPETAS DEL NIVEL ACTUAL
-// ============================================
-
-function renderFolders(
-    folders
-) {
-
-    const container =
-        document.querySelector(
-            ".brand-grid"
-        );
-
-
-    if (!container) {
-
-        return;
-
-    }
-
-
-    container.innerHTML = "";
-
-
-    folders.forEach(
-        folder => {
-
-            const card =
-                document.createElement(
-                    "article"
-                );
-
-
-            card.className =
-                "brand-card";
-
-
-            card.style.borderColor =
-                folder.color;
-
-
-            card.innerHTML = `
-
-                <div
-                    class="brand-icon"
-                >
-                    📁
-                </div>
-
-
-                <div>
-
-                    <div
-                        class="brand-name"
-                    >
-                        ${escapeHTML(
-                            folder.name
-                        )}
-                    </div>
-
-
-                    <div
-                        class="brand-count"
-                    >
-                        ${
-                            folder.folders.length
-                        }
-                        carpetas ·
-                        ${
-                            folder.notes.length
-                        }
-                        notas
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="brand-actions"
-                >
-
-                    <button
-                        class="edit-folder"
-                        type="button"
-                    >
-                        ✏️
-                    </button>
-
-
-                    <button
-                        class="delete-folder"
-                        type="button"
-                    >
-                        🗑️
-                    </button>
-
-                </div>
-
-            `;
-
-
-            card.addEventListener(
-                "click",
-                function() {
-
-                    openFolder(
-                        folder.id
-                    );
-
-                }
-            );
-
-
-            const editButton =
-                card.querySelector(
-                    ".edit-folder"
-                );
-
-
-            editButton.addEventListener(
-                "click",
-                function(event) {
-
-                    event.stopPropagation();
-
-                    editFolder(
-                        folder.id
-                    );
-
-                }
-            );
-
-
-            const deleteButton =
-                card.querySelector(
-                    ".delete-folder"
-                );
-
-
-            deleteButton.addEventListener(
-                "click",
-                function(event) {
-
-                    event.stopPropagation();
-
-                    deleteFolder(
-                        folder.id
-                    );
-
-                }
-            );
-
-
-            container.appendChild(
-                card
-            );
-
-        }
-    );
-
-}
-
-
-// ============================================
-// ABRIR CARPETA
-// ============================================
-
-function openFolder(
-    id
-) {
-
-    const folder =
-        findFolder(
-            brands,
-            id
-        );
-
-
-    if (!folder) {
-
-        return;
-
-    }
-
-
-    currentFolder =
-        folder;
-
-
-    document.querySelector(
-        "#home-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#note-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#note-editor-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#brand-view"
-    ).style.display =
-        "block";
-
-
-    document.querySelector(
-        "#brand-title"
-    ).textContent =
-        folder.name;
-
-
-    document.querySelector(
-        "#brand-icon"
-    ).style.color =
-        folder.color;
-
-
-    renderCurrentFolder();
-
-}
-
-
-// ============================================
-// MOSTRAR CONTENIDO DE CARPETA
-// ============================================
-
-function renderCurrentFolder() {
-
-    if (!currentFolder) {
-
-        return;
-
-    }
-
-
-    renderFolders(
-        currentFolder.folders
-    );
-
-
-    renderNotes();
-
-}
-
-
-// ============================================
-// VOLVER
-// ============================================
-
-function goBack() {
-
-    if (!currentFolder) {
-
-        return;
-
-    }
-
-
-    const parent =
-        findParentFolder(
-            brands,
-            currentFolder.id
-        );
-
-
-    if (parent) {
-
-        currentFolder =
-            parent;
-
-        renderCurrentFolder();
-
-        updateFolderHeader();
-
-        return;
-
-    }
-
-
-    closeFolder();
-
-}
-
 
 // ============================================
 // ENCONTRAR PADRE
 // ============================================
 
-function findParentFolder(
+function findParent(
     folders,
     childId
 ) {
@@ -694,7 +205,7 @@ function findParentFolder(
 
 
         const parent =
-            findParentFolder(
+            findParent(
                 folder.folders,
                 childId
             );
@@ -708,59 +219,247 @@ function findParentFolder(
 
     }
 
-
     return null;
 
 }
+
+
 // ============================================
-// CERRAR CARPETA
+// ABRIR CARPETA
 // ============================================
 
-function closeFolder() {
+function openFolder(id) {
 
-    currentFolder = null;
-
-
-    document.querySelector(
-        "#brand-view"
-    ).style.display =
-        "none";
+    const folder =
+        findFolder(
+            data.folders,
+            id
+        );
 
 
-    document.querySelector(
-        "#note-view"
-    ).style.display =
-        "none";
+    if (!folder) {
+
+        return;
+
+    }
 
 
-    document.querySelector(
-        "#note-editor-view"
-    ).style.display =
-        "none";
+    currentFolder =
+        folder;
 
 
-    document.querySelector(
-        "#home-view"
-    ).style.display =
-        "block";
+    currentNote =
+        null;
 
 
-    renderBrands();
+    render();
 
 }
 
 
 // ============================================
-// ACTUALIZAR ENCABEZADO
+// VOLVER
 // ============================================
 
-function updateFolderHeader() {
+function goBack() {
 
     if (!currentFolder) {
 
         return;
 
     }
+
+
+    const parent =
+        findParent(
+            data.folders,
+            currentFolder.id
+        );
+
+
+    if (parent) {
+
+        currentFolder =
+            parent;
+
+    } else {
+
+        currentFolder =
+            null;
+
+    }
+
+
+    currentNote =
+        null;
+
+
+    render();
+
+}
+
+
+// ============================================
+// CREAR NOTA
+// ============================================
+
+function createNote(
+    title,
+    content
+) {
+
+    if (!currentFolder) {
+
+        return;
+
+    }
+
+
+    const note = {
+
+        id: Date.now(),
+
+        title: title,
+
+        content: content
+
+    };
+
+
+    currentFolder.notes.push(
+        note
+    );
+
+
+    saveData();
+
+    render();
+
+}
+
+
+// ============================================
+// BUSCAR NOTA
+// ============================================
+
+function findNote(id) {
+
+    if (!currentFolder) {
+
+        return null;
+
+    }
+
+
+    return currentFolder.notes.find(
+        note =>
+            note.id === id
+    );
+
+}
+
+
+// ============================================
+// ABRIR NOTA
+// ============================================
+
+function openNote(id) {
+
+    const note =
+        findNote(id);
+
+
+    if (!note) {
+
+        return;
+
+    }
+
+
+    currentNote =
+        note;
+
+
+    renderNote();
+
+}
+
+// ============================================
+// RENDER PRINCIPAL
+// ============================================
+
+function render() {
+
+    if (currentNote) {
+
+        renderNote();
+
+        return;
+
+    }
+
+
+    if (currentFolder) {
+
+        renderFolder();
+
+        return;
+
+    }
+
+
+    renderHome();
+
+}
+
+
+// ============================================
+// RENDER INICIO
+// ============================================
+
+function renderHome() {
+
+    showView("home-view");
+
+
+    const grid =
+        document.querySelector(
+            ".brand-grid"
+        );
+
+
+    if (!grid) {
+
+        return;
+
+    }
+
+
+    grid.innerHTML = "";
+
+
+    data.folders.forEach(
+        folder => {
+
+            grid.appendChild(
+                createFolderCard(
+                    folder
+                )
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================
+// RENDER CARPETA
+// ============================================
+
+function renderFolder() {
+
+    showView("brand-view");
 
 
     const title =
@@ -777,378 +476,61 @@ function updateFolderHeader() {
     }
 
 
-    const icon =
-        document.querySelector(
-            "#brand-icon"
-        );
-
-
-    if (icon) {
-
-        icon.style.color =
-            currentFolder.color;
-
-    }
-
-}
-
-
-// ============================================
-// RENDERIZAR VISTA ACTUAL
-// ============================================
-
-function renderCurrentView() {
-
-    if (currentFolder) {
-
-        renderCurrentFolder();
-
-        updateFolderHeader();
-
-    }
-
-    else {
-
-        renderBrands();
-
-    }
-
-}
-
-
-// ============================================
-// CREAR CARPETA EN EL NIVEL ACTUAL
-// ============================================
-
-function createFolderFromCurrentView() {
-
-    const name =
-        prompt(
-            "Nombre de la carpeta:"
-        );
-
-
-    if (
-        !name ||
-        !name.trim()
-    ) {
-
-        return;
-
-    }
-
-
-    const color =
-        prompt(
-            "Color HEX de la carpeta:",
-            "#b8ff3d"
-        );
-
-
-    createFolder(
-        name.trim(),
-        color,
-        currentFolder
-    );
-
-
-    renderCurrentView();
-
-}
-
-
-// ============================================
-// MOSTRAR CARPETAS PRINCIPALES
-// ============================================
-
-function renderBrands() {
-
-    const container =
+    const grid =
         document.querySelector(
             ".brand-grid"
         );
 
 
-    if (!container) {
-
-        return;
-
-    }
-
-
-    container.innerHTML = "";
-
-
-    brands.forEach(
-        folder => {
-
-            const card =
-                document.createElement(
-                    "article"
-                );
-
-
-            card.className =
-                "brand-card";
-
-
-            card.style.borderColor =
-                folder.color;
-
-
-            card.innerHTML = `
-
-                <div
-                    class="brand-icon"
-                >
-                    📁
-                </div>
-
-
-                <div>
-
-                    <div
-                        class="brand-name"
-                    >
-                        ${escapeHTML(
-                            folder.name
-                        )}
-                    </div>
-
-
-                    <div
-                        class="brand-count"
-                    >
-                        ${
-                            folder.folders.length
-                        }
-                        carpetas ·
-                        ${
-                            folder.notes.length
-                        }
-                        notas
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="brand-actions"
-                >
-
-                    <button
-                        class="edit-folder"
-                        type="button"
-                    >
-                        ✏️
-                    </button>
-
-
-                    <button
-                        class="delete-folder"
-                        type="button"
-                    >
-                        🗑️
-                    </button>
-
-                </div>
-
-            `;
-
-
-            card.addEventListener(
-                "click",
-                function() {
-
-                    openFolder(
-                        folder.id
-                    );
-
-                }
-            );
-
-
-            const editButton =
-                card.querySelector(
-                    ".edit-folder"
-                );
-
-
-            editButton.addEventListener(
-                "click",
-                function(event) {
-
-                    event.stopPropagation();
-
-                    editFolder(
-                        folder.id
-                    );
-
-                }
-            );
-
-
-            const deleteButton =
-                card.querySelector(
-                    ".delete-folder"
-                );
-
-
-            deleteButton.addEventListener(
-                "click",
-                function(event) {
-
-                    event.stopPropagation();
-
-                    deleteFolder(
-                        folder.id
-                    );
-
-                }
-            );
-
-
-            container.appendChild(
-                card
-            );
-
-        }
-    );
-
-}
-
-
-// ============================================
-// MOSTRAR NOTAS
-// ============================================
-
-function renderNotes() {
-
-    if (!currentFolder) {
-
-        return;
-
-    }
-
-
-    const container =
+    const noteGrid =
         document.querySelector(
             "#note-grid"
         );
 
 
-    if (!container) {
+    if (grid) {
 
-        return;
+        grid.innerHTML = "";
 
     }
 
 
-    container.innerHTML = "";
+    if (noteGrid) {
+
+        noteGrid.innerHTML = "";
+
+    }
+
+
+    currentFolder.folders.forEach(
+        folder => {
+
+            if (grid) {
+
+                grid.appendChild(
+                    createFolderCard(
+                        folder
+                    )
+                );
+
+            }
+
+        }
+    );
 
 
     currentFolder.notes.forEach(
         note => {
 
-            const card =
-                document.createElement(
-                    "article"
+            if (noteGrid) {
+
+                noteGrid.appendChild(
+                    createNoteCard(
+                        note
+                    )
                 );
 
-
-            card.className =
-                "brand-card";
-
-
-            card.innerHTML = `
-
-                <div
-                    class="brand-icon"
-                >
-                    📝
-                </div>
-
-
-                <div>
-
-                    <div
-                        class="brand-name"
-                    >
-                        ${escapeHTML(
-                            note.title
-                        )}
-                    </div>
-
-
-                    <div
-                        class="brand-count"
-                    >
-                        ${
-                            note.content
-                                ? escapeHTML(
-                                    note.content.substring(
-                                        0,
-                                        60
-                                    )
-                                )
-                                : "Sin contenido"
-                        }
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="brand-actions"
-                >
-
-                    <button
-                        class="delete-note"
-                        type="button"
-                    >
-                        🗑️
-                    </button>
-
-                </div>
-
-            `;
-
-
-            card.addEventListener(
-                "click",
-                function() {
-
-                    openNote(
-                        note.id
-                    );
-
-                }
-            );
-
-
-            const deleteButton =
-                card.querySelector(
-                    ".delete-note"
-                );
-
-
-            deleteButton.addEventListener(
-                "click",
-                function(event) {
-
-                    event.stopPropagation();
-
-                    deleteNote(
-                        note.id
-                    );
-
-                }
-            );
-
-
-            container.appendChild(
-                card
-            );
+            }
 
         }
     );
@@ -1157,54 +539,158 @@ function renderNotes() {
 
 
 // ============================================
-// ABRIR NOTA
+// TARJETA DE CARPETA
 // ============================================
 
-function openNote(
-    id
+function createFolderCard(
+    folder
 ) {
 
-    if (!currentFolder) {
-
-        return;
-
-    }
-
-
-    const note =
-        currentFolder.notes.find(
-            note =>
-                note.id === id
+    const card =
+        document.createElement(
+            "article"
         );
 
 
-    if (!note) {
-
-        return;
-
-    }
+    card.className =
+        "brand-card";
 
 
-    currentNoteId =
-        id;
+    card.style.borderColor =
+        folder.color;
 
 
-    document.querySelector(
-        "#brand-view"
-    ).style.display =
-        "none";
+    card.innerHTML = `
+
+        <div class="brand-icon">
+            📁
+        </div>
+
+        <div>
+
+            <div class="brand-name">
+                ${escapeHTML(
+                    folder.name
+                )}
+            </div>
+
+            <div class="brand-count">
+                ${
+                    folder.folders.length
+                }
+                carpetas ·
+                ${
+                    folder.notes.length
+                }
+                notas
+            </div>
+
+        </div>
+
+        <div class="brand-actions">
+
+            <button
+                class="edit-folder"
+                type="button"
+            >
+                ✏️
+            </button>
+
+            <button
+                class="delete-folder"
+                type="button"
+            >
+                🗑️
+            </button>
+
+        </div>
+
+    `;
 
 
-    document.querySelector(
-        "#note-editor-view"
-    ).style.display =
-        "none";
+    card.addEventListener(
+        "click",
+        () => {
+
+            openFolder(
+                folder.id
+            );
+
+        }
+    );
 
 
-    document.querySelector(
-        "#note-view"
-    ).style.display =
-        "block";
+    return card;
+
+}
+
+// ============================================
+// TARJETA DE NOTA
+// ============================================
+
+function createNoteCard(
+    note
+) {
+
+    const card =
+        document.createElement(
+            "article"
+        );
+
+
+    card.className =
+        "brand-card";
+
+
+    card.innerHTML = `
+
+        <div class="brand-icon">
+            📝
+        </div>
+
+        <div>
+
+            <div class="brand-name">
+                ${escapeHTML(
+                    note.title
+                )}
+            </div>
+
+            <div class="brand-count">
+                Nota
+            </div>
+
+        </div>
+
+    `;
+
+
+    card.addEventListener(
+        "click",
+        () => {
+
+            openNote(
+                note.id
+            );
+
+        }
+    );
+
+
+    return card;
+
+}
+
+
+// ============================================
+// MOSTRAR NOTA
+// ============================================
+
+function renderNote() {
+
+    showView(
+        "note-view"
+    );
 
 
     const title =
@@ -1222,7 +708,7 @@ function openNote(
     if (title) {
 
         title.textContent =
-            note.title;
+            currentNote.title;
 
     }
 
@@ -1230,7 +716,7 @@ function openNote(
     if (content) {
 
         content.textContent =
-            note.content ||
+            currentNote.content ||
             "Esta nota está vacía.";
 
     }
@@ -1239,362 +725,137 @@ function openNote(
 
 
 // ============================================
-// VOLVER DE UNA NOTA
+// MOSTRAR VISTA
 // ============================================
 
-function closeNote() {
-
-    document.querySelector(
-        "#note-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#brand-view"
-    ).style.display =
-        "block";
-
-
-    currentNoteId =
-        null;
-
-
-    renderCurrentFolder();
-
-}
-
-
-// ============================================
-// CREAR NOTA
-// ============================================
-
-function openNewNoteEditor() {
-
-    if (!currentFolder) {
-
-        return;
-
-    }
-
-
-    editingNoteId =
-        null;
-
-
-    document.querySelector(
-        "#editor-title"
-    ).textContent =
-        "Nueva nota";
-
-
-    document.querySelector(
-        "#note-title-input"
-    ).value =
-        "";
-
-
-    document.querySelector(
-        "#note-content-input"
-    ).value =
-        "";
-
-
-    document.querySelector(
-        "#brand-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#note-editor-view"
-    ).style.display =
-        "block";
-
-
-    document.querySelector(
-        "#note-title-input"
-    ).focus();
-
-}
-
-
-// ============================================
-// EDITAR NOTA
-// ============================================
-
-function openEditNoteEditor() {
-
-    if (!currentFolder) {
-
-        return;
-
-    }
-
-
-    const note =
-        currentFolder.notes.find(
-            note =>
-                note.id === currentNoteId
-        );
-
-
-    if (!note) {
-
-        return;
-
-    }
-
-
-    editingNoteId =
-        note.id;
-
-
-    document.querySelector(
-        "#editor-title"
-    ).textContent =
-        "Editar nota";
-
-
-    document.querySelector(
-        "#note-title-input"
-    ).value =
-        note.title;
-
-
-    document.querySelector(
-        "#note-content-input"
-    ).value =
-        note.content;
-
-
-    document.querySelector(
-        "#note-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#note-editor-view"
-    ).style.display =
-        "block";
-
-
-    document.querySelector(
-        "#note-title-input"
-    ).focus();
-
-}
-
-
-// ============================================
-// GUARDAR NOTA
-// ============================================
-
-function saveNoteFromEditor() {
-
-    if (!currentFolder) {
-
-        return;
-
-    }
-
-
-    const titleInput =
-        document.querySelector(
-            "#note-title-input"
-        );
-
-
-    const contentInput =
-        document.querySelector(
-            "#note-content-input"
-        );
-
-
-    const title =
-        titleInput.value.trim();
-
-
-    const content =
-        contentInput.value;
-
-
-    if (!title) {
-
-        alert(
-            "La nota necesita un título."
-        );
-
-
-        titleInput.focus();
-
-        return;
-
-    }
-
-
-    if (
-        editingNoteId !== null
-    ) {
-
-        const note =
-            currentFolder.notes.find(
-                note =>
-                    note.id ===
-                    editingNoteId
-            );
-
-
-        if (note) {
-
-           note.title =
-                title;
-
-            note.content =
-                content;
-
-        }
-
-    }
-
-    else {
-
-        const newNote = {
-
-            id: Date.now(),
-
-            title: title,
-
-            content: content
-
-        };
-
-
-        currentFolder.notes.push(
-            newNote
-        );
-
-
-        currentNoteId =
-            newNote.id;
-
-    }
-
-
-    saveBrands();
-
-
-    document.querySelector(
-        "#note-editor-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#note-view"
-    ).style.display =
-        "block";
-
-
-    openNote(
-        currentNoteId
-    );
-
-
-    renderCurrentFolder();
-
-}
-
-
-// ============================================
-// CANCELAR EDITOR
-// ============================================
-
-function cancelNoteEditor() {
-
-    document.querySelector(
-        "#note-editor-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#note-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#brand-view"
-    ).style.display =
-        "block";
-
-
-    editingNoteId =
-        null;
-
-
-    renderCurrentFolder();
-
-}
-
-
-// ============================================
-// ELIMINAR NOTA
-// ============================================
-
-function deleteNote(
+function showView(
     id
 ) {
 
-    if (!currentFolder) {
+    const views =
+        document.querySelectorAll(
+            "section"
+        );
+
+
+    views.forEach(
+        view => {
+
+            view.style.display =
+                "none";
+
+        }
+    );
+
+
+    const target =
+        document.querySelector(
+            `#${id}`
+        );
+
+
+    if (target) {
+
+        target.style.display =
+            "block";
+
+    }
+
+}
+
+
+// ============================================
+// CREAR DESDE EL +
+// ============================================
+
+function showCreateMenu() {
+
+    const choice =
+        prompt(
+            "¿Qué querés crear?\n\n" +
+            "1 - Carpeta\n" +
+            "2 - Nota\n\n" +
+            "Cancelá para salir."
+        );
+
+
+    if (choice === "1") {
+
+        const name =
+            prompt(
+                "Nombre de la carpeta:"
+            );
+
+
+        if (
+            !name ||
+            !name.trim()
+        ) {
+
+            return;
+
+        }
+
+
+        const color =
+            prompt(
+                "Color HEX:",
+                "#b8ff3d"
+            );
+
+
+        createFolder(
+            name.trim(),
+            color
+        );
+
 
         return;
 
     }
 
 
-    const confirmed =
-        confirm(
-            "¿Eliminar esta nota?"
+    if (choice === "2") {
+
+        if (!currentFolder) {
+
+            alert(
+                "Las notas se crean dentro de una carpeta."
+            );
+
+            return;
+
+        }
+
+
+        const title =
+            prompt(
+                "Título de la nota:"
+            );
+
+
+        if (
+            !title ||
+            !title.trim()
+        ) {
+
+            return;
+
+        }
+
+
+        const content =
+            prompt(
+                "Escribí el contenido:"
+            );
+
+
+        createNote(
+            title.trim(),
+            content || ""
         );
-
-
-    if (!confirmed) {
-
-        return;
 
     }
-
-
-    currentFolder.notes =
-        currentFolder.notes.filter(
-            note =>
-                note.id !== id
-        );
-
-
-    saveBrands();
-
-
-    renderCurrentFolder();
-
-
-    document.querySelector(
-        "#note-view"
-    ).style.display =
-        "none";
-
-
-    document.querySelector(
-        "#brand-view"
-    ).style.display =
-        "block";
-
-
-    currentNoteId =
-        null;
 
 }
 
@@ -1607,51 +868,25 @@ function escapeHTML(
     text
 ) {
 
-    const div =
+    const element =
         document.createElement(
             "div"
         );
 
 
-    div.textContent =
+    element.textContent =
         text;
 
 
-    return div.innerHTML;
+    return element.innerHTML;
 
 }
 
 // ============================================
-// BOTONES
+// CONFIGURAR BOTONES
 // ============================================
 
 function setupButtons() {
-
-    const addButtons =
-        document.querySelectorAll(
-            ".add-button"
-        );
-
-
-    if (addButtons.length > 0) {
-
-        const addButton =
-            addButtons[
-                addButtons.length - 1
-            ];
-
-
-        addButton.addEventListener(
-            "click",
-            function() {
-
-                createFolderFromCurrentView();
-
-            }
-        );
-
-    }
-
 
     const backButton =
         document.querySelector(
@@ -1663,48 +898,51 @@ function setupButtons() {
 
         backButton.addEventListener(
             "click",
-            function() {
-
-                goBack();
-
-            }
+            goBack
         );
 
     }
 
 
-    const addNoteButton =
+    const noteBackButton =
         document.querySelector(
-            "#add-note-button"
+            "#note-back-button"
         );
 
 
-    if (addNoteButton) {
+    if (noteBackButton) {
 
-        addNoteButton.addEventListener(
+        noteBackButton.addEventListener(
             "click",
-            function() {
+            () => {
 
-                openNewNoteEditor();
+                currentNote =
+                    null;
+
+                render();
 
             }
         );
 
     }
 
-}
 
-
-// ============================================
-// BOTONES DE NOTAS
-// ============================================
-
-function setupNoteButtons() {
-
-    const editButton =
-        document.querySelector(
-            "#edit-note-button"
+    const addButtons =
+        document.querySelectorAll(
+            ".add-button"
         );
+
+
+    addButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                showCreateMenu
+            );
+
+        }
+    );
 
 
     const deleteButton =
@@ -1713,47 +951,52 @@ function setupNoteButtons() {
         );
 
 
-    const saveButton =
-        document.querySelector(
-            "#save-note-button"
-        );
-
-
-    if (editButton) {
-
-        editButton.addEventListener(
-            "click",
-            openEditNoteEditor
-        );
-
-    }
-
-
     if (deleteButton) {
 
         deleteButton.addEventListener(
             "click",
-            function() {
+            () => {
 
-                if (currentNoteId) {
+                if (
+                    !currentFolder ||
+                    !currentNote
+                ) {
 
-                    deleteNote(
-                        currentNoteId
-                    );
+                    return;
 
                 }
 
+
+                const confirmed =
+                    confirm(
+                        "¿Eliminar esta nota?"
+                    );
+
+
+                if (!confirmed) {
+
+                    return;
+
+                }
+
+
+                currentFolder.notes =
+                    currentFolder.notes.filter(
+                        note =>
+                            note.id !==
+                            currentNote.id
+                    );
+
+
+                currentNote =
+                    null;
+
+
+                saveData();
+
+                render();
+
             }
-        );
-
-    }
-
-
-    if (saveButton) {
-
-        saveButton.addEventListener(
-            "click",
-            saveNoteFromEditor
         );
 
     }
@@ -1762,18 +1005,16 @@ function setupNoteButtons() {
 
 
 // ============================================
-// INICIAR APP
+// INICIAR
 // ============================================
 
 document.addEventListener(
     "DOMContentLoaded",
-    function() {
-
-        renderBrands();
+    () => {
 
         setupButtons();
 
-        setupNoteButtons();
+        render();
 
     }
 );
