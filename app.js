@@ -640,6 +640,58 @@ function searchAll(
 
 }
 
+// ============================================
+// OBTENER RUTA DE CARPETA
+// ============================================
+
+function getFolderPath(
+    id,
+    folders = data.folders,
+    path = []
+) {
+
+    for (
+        const folder of folders
+    ) {
+
+        const newPath =
+            [
+                ...path,
+                folder.name
+            ];
+
+
+        if (
+            folder.id === id
+        ) {
+
+            return newPath.join(
+                " / "
+            );
+
+        }
+
+
+        const result =
+            getFolderPath(
+                id,
+                folder.folders,
+                newPath
+            );
+
+
+        if (result) {
+
+            return result;
+
+        }
+
+    }
+
+
+    return "";
+
+}
 
 // ============================================
 // RENDER CARPETA
