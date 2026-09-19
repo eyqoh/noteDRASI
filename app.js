@@ -694,6 +694,166 @@ function getFolderPath(
 }
 
 // ============================================
+// MOSTRAR RESULTADOS DEL BUSCADOR
+// ============================================
+
+function renderSearchResults(
+    query
+) {
+
+    const grid =
+        document.querySelector(
+            ".brand-grid"
+        );
+
+
+    if (!grid) {
+
+        return;
+
+    }
+
+
+    grid.innerHTML = "";
+
+
+    const results =
+        searchAll(
+            data.folders,
+            query
+        );
+
+
+    if (
+        results.length === 0
+    ) {
+
+        grid.innerHTML = `
+            <div class="search-empty">
+                No se encontraron resultados.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    results.forEach(
+        result => {
+
+            const card =
+                document.createElement(
+                    "article"
+                );
+
+
+            card.className =
+                "brand-card";
+
+
+            if (
+                result.type ===
+                "folder"
+            ) {
+
+                card.innerHTML = `
+
+                    <div class="brand-icon">
+                        📁
+                    </div>
+
+                    <div class="brand-info">
+
+                        <div class="brand-name">
+                            ${escapeHTML(
+                                result.item.name
+                            )}
+                        </div>
+
+                        <div class="brand-count">
+                            ${escapeHTML(
+                                result.path
+                            )}
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                card.addEventListener(
+                    "click",
+                    () => {
+
+                        openFolder(
+                            result.item.id
+                        );
+
+                    }
+                );
+
+            }
+
+
+            if (
+                result.type ===
+                "note"
+            ) {
+
+                card.innerHTML = `
+
+                    <div class="brand-icon">
+                        📝
+                    </div>
+
+                    <div class="brand-info">
+
+                        <div class="brand-name">
+                            ${escapeHTML(
+                                result.item.title
+                            )}
+                        </div>
+
+                        <div class="brand-count">
+                            ${escapeHTML(
+                                result.path
+                            )}
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                card.addEventListener(
+                    "click",
+                    () => {
+
+                        currentFolder =
+                            result.folder;
+
+                        currentNote =
+                            result.item;
+
+                        render();
+
+                    }
+                );
+
+            }
+
+
+            grid.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+// ============================================
 // RENDER CARPETA
 // ============================================
 
