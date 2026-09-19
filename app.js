@@ -1039,6 +1039,7 @@ function escapeHTML(
 // CONFIGURAR BOTONES
 // ============================================
 
+
 function setupButtons() {
 
     const backButton =
@@ -1098,6 +1099,86 @@ function setupButtons() {
     );
 
 
+    // ============================================
+    // EDITAR NOTA
+    // ============================================
+
+    const editButton =
+        document.querySelector(
+            "#edit-note-button"
+        );
+
+
+    if (editButton) {
+
+        editButton.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    !currentFolder ||
+                    !currentNote
+                ) {
+
+                    return;
+
+                }
+
+
+                const newTitle =
+                    prompt(
+                        "Nuevo título:",
+                        currentNote.title
+                    );
+
+
+                if (
+                    !newTitle ||
+                    !newTitle.trim()
+                ) {
+
+                    return;
+
+                }
+
+
+                const newContent =
+                    prompt(
+                        "Nuevo contenido:",
+                        currentNote.content || ""
+                    );
+
+
+                if (
+                    newContent === null
+                ) {
+
+                    return;
+
+                }
+
+
+                currentNote.title =
+                    newTitle.trim();
+
+                currentNote.content =
+                    newContent;
+
+
+                saveData();
+
+                render();
+
+            }
+        );
+
+    }
+
+
+    // ============================================
+    // ELIMINAR NOTA
+    // ============================================
+
     const deleteButton =
         document.querySelector(
             "#delete-note-button"
@@ -1155,7 +1236,6 @@ function setupButtons() {
     }
 
 }
-
 
 // ============================================
 // INICIAR
