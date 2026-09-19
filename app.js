@@ -1100,30 +1100,123 @@ function setupButtons() {
 
 
     // ============================================
-    // EDITAR NOTA
-    // ============================================
+// EDITAR NOTA
+// ============================================
 
-    const editButton =
-        document.querySelector(
-            "#edit-note-button"
-        );
+const editButton =
+    document.querySelector(
+        "#edit-note-button"
+    );
 
 
-    if (editButton) {
+if (editButton) {
 
-        editButton.addEventListener(
-            "click",
-            () => {
+    editButton.addEventListener(
+        "click",
+        () => {
+
+            if (
+                !currentFolder ||
+                !currentNote
+            ) {
+
+                return;
+
+            }
+
+
+            const choice =
+                prompt(
+                    "¿Qué querés editar?\n\n" +
+                    "1 - Nombre\n" +
+                    "2 - Contenido\n" +
+                    "3 - Nombre y contenido"
+                );
+
+
+            if (!choice) {
+
+                return;
+
+            }
+
+
+            // ====================================
+            // SOLO NOMBRE
+            // ====================================
+
+            if (choice === "1") {
+
+                const newTitle =
+                    prompt(
+                        "Nuevo título:",
+                        currentNote.title
+                    );
+
 
                 if (
-                    !currentFolder ||
-                    !currentNote
+                    !newTitle ||
+                    !newTitle.trim()
                 ) {
 
                     return;
 
                 }
 
+
+                currentNote.title =
+                    newTitle.trim();
+
+
+                saveData();
+
+                render();
+
+                return;
+
+            }
+
+
+            // ====================================
+            // SOLO CONTENIDO
+            // ====================================
+
+            if (choice === "2") {
+
+                const newContent =
+                    prompt(
+                        "Nuevo contenido:",
+                        currentNote.content || ""
+                    );
+
+
+                if (
+                    newContent === null
+                ) {
+
+                    return;
+
+                }
+
+
+                currentNote.content =
+                    newContent;
+
+
+                saveData();
+
+                render();
+
+                return;
+
+            }
+
+
+            // ====================================
+            // NOMBRE Y CONTENIDO
+            // ====================================
+
+            if (choice === "3") {
 
                 const newTitle =
                     prompt(
@@ -1170,10 +1263,11 @@ function setupButtons() {
                 render();
 
             }
-        );
 
-    }
+        }
+    );
 
+}
 
     // ============================================
     // ELIMINAR NOTA
