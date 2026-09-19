@@ -1363,7 +1363,6 @@ function escapeHTML(
 // CONFIGURAR BOTONES
 // ============================================
 
-
 function setupButtons() {
 
     const backButton =
@@ -1424,63 +1423,65 @@ function setupButtons() {
 
 
     // ============================================
-// EDITAR NOTA
-// ============================================
+    // BUSCADOR
+    // ============================================
 
-const editButton =
-    document.querySelector(
-        "#edit-note-button"
-    );
-
-
-if (editButton) {
-
-    editButton.addEventListener(
-        "click",
-        () => {
-
-            if (
-                !currentFolder ||
-                !currentNote
-            ) {
-
-                return;
-
-            }
+    const searchInput =
+        document.querySelector(
+            ".search"
+        );
 
 
-            const choice =
-                prompt(
-                    "¿Qué querés editar?\n\n" +
-                    "1 - Nombre\n" +
-                    "2 - Contenido\n" +
-                    "3 - Nombre y contenido"
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            () => {
+
+                const query =
+                    searchInput.value;
+
+
+                if (
+                    !query.trim()
+                ) {
+
+                    renderHome();
+
+                    return;
+
+                }
+
+
+                renderSearchResults(
+                    query
                 );
 
-
-            if (!choice) {
-
-                return;
-
             }
+        );
+
+    }
 
 
-            // ====================================
-            // SOLO NOMBRE
-            // ====================================
+    // ============================================
+    // EDITAR NOTA
+    // ============================================
 
-            if (choice === "1") {
+    const editButton =
+        document.querySelector(
+            "#edit-note-button"
+        );
 
-                const newTitle =
-                    prompt(
-                        "Nuevo título:",
-                        currentNote.title
-                    );
 
+    if (editButton) {
+
+        editButton.addEventListener(
+            "click",
+            () => {
 
                 if (
-                    !newTitle ||
-                    !newTitle.trim()
+                    !currentFolder ||
+                    !currentNote
                 ) {
 
                     return;
@@ -1488,110 +1489,150 @@ if (editButton) {
                 }
 
 
-                currentNote.title =
-                    newTitle.trim();
-
-
-                saveData();
-
-                render();
-
-                return;
-
-            }
-
-
-            // ====================================
-            // SOLO CONTENIDO
-            // ====================================
-
-            if (choice === "2") {
-
-                const newContent =
+                const choice =
                     prompt(
-                        "Nuevo contenido:",
-                        currentNote.content || ""
+                        "¿Qué querés editar?\n\n" +
+                        "1 - Nombre\n" +
+                        "2 - Contenido\n" +
+                        "3 - Nombre y contenido"
                     );
 
 
-                if (
-                    newContent === null
-                ) {
+                if (!choice) {
 
                     return;
 
                 }
 
 
-                currentNote.content =
-                    newContent;
-
-
-                saveData();
-
-                render();
-
-                return;
-
-            }
-
-
-            // ====================================
-            // NOMBRE Y CONTENIDO
-            // ====================================
-
-            if (choice === "3") {
-
-                const newTitle =
-                    prompt(
-                        "Nuevo título:",
-                        currentNote.title
-                    );
-
+                // SOLO NOMBRE
 
                 if (
-                    !newTitle ||
-                    !newTitle.trim()
+                    choice === "1"
                 ) {
+
+                    const newTitle =
+                        prompt(
+                            "Nuevo título:",
+                            currentNote.title
+                        );
+
+
+                    if (
+                        !newTitle ||
+                        !newTitle.trim()
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    currentNote.title =
+                        newTitle.trim();
+
+
+                    saveData();
+
+                    render();
 
                     return;
 
                 }
 
 
-                const newContent =
-                    prompt(
-                        "Nuevo contenido:",
-                        currentNote.content || ""
-                    );
-
+                // SOLO CONTENIDO
 
                 if (
-                    newContent === null
+                    choice === "2"
                 ) {
+
+                    const newContent =
+                        prompt(
+                            "Nuevo contenido:",
+                            currentNote.content || ""
+                        );
+
+
+                    if (
+                        newContent === null
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    currentNote.content =
+                        newContent;
+
+
+                    saveData();
+
+                    render();
 
                     return;
 
                 }
 
 
-                currentNote.title =
-                    newTitle.trim();
+                // NOMBRE Y CONTENIDO
 
-                currentNote.content =
-                    newContent;
+                if (
+                    choice === "3"
+                ) {
+
+                    const newTitle =
+                        prompt(
+                            "Nuevo título:",
+                            currentNote.title
+                        );
 
 
-                saveData();
+                    if (
+                        !newTitle ||
+                        !newTitle.trim()
+                    ) {
 
-                render();
+                        return;
+
+                    }
+
+
+                    const newContent =
+                        prompt(
+                            "Nuevo contenido:",
+                            currentNote.content || ""
+                        );
+
+
+                    if (
+                        newContent === null
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    currentNote.title =
+                        newTitle.trim();
+
+                    currentNote.content =
+                        newContent;
+
+
+                    saveData();
+
+                    render();
+
+                }
 
             }
+        );
 
-        }
-    );
+    }
 
-}
 
     // ============================================
     // ELIMINAR NOTA
