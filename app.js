@@ -1431,7 +1431,12 @@ function setupButtons() {
             ".search"
         );
 
+console.log(
+    "BUSCADOR:",
+    searchInput
+);
 
+    
     if (searchInput) {
 
         searchInput.addEventListener(
