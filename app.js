@@ -528,6 +528,118 @@ function renderHome() {
 
 }
 
+// ============================================
+// BUSCADOR
+// ============================================
+
+function searchAll(
+    folders,
+    query,
+    results = []
+) {
+
+    const search =
+        query
+            .trim()
+            .toLowerCase();
+
+
+    if (!search) {
+
+        return results;
+
+    }
+
+
+    folders.forEach(
+        folder => {
+
+            // Buscar carpeta
+            if (
+                folder.name
+                    .toLowerCase()
+                    .includes(search)
+            ) {
+
+                results.push({
+
+                    type: "folder",
+
+                    item: folder,
+
+                    path: getFolderPath(
+                        folder.id
+                    )
+
+                });
+
+            }
+
+
+            // Buscar notas
+            folder.notes.forEach(
+                note => {
+
+                    const title =
+                        (
+                            note.title ||
+                            ""
+                        )
+                            .toLowerCase();
+
+
+                    const content =
+                        (
+                            note.content ||
+                            ""
+                        )
+                            .toLowerCase();
+
+
+                    if (
+                        title.includes(
+                            search
+                        ) ||
+                        content.includes(
+                            search
+                        )
+                    ) {
+
+                        results.push({
+
+                            type: "note",
+
+                            item: note,
+
+                            folder: folder,
+
+                            path: getFolderPath(
+                                folder.id
+                            )
+
+                        });
+
+                    }
+
+                }
+            );
+
+
+            // Buscar dentro de subcarpetas
+            searchAll(
+                folder.folders,
+                query,
+                results
+            );
+
+        }
+    );
+
+
+    return results;
+
+}
+
 
 // ============================================
 // RENDER CARPETA
